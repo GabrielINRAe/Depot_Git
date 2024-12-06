@@ -11,11 +11,11 @@ from sklearn.model_selection import cross_val_score, StratifiedKFold
 import matplotlib.pyplot as plt
 
 
-def filter_classes(dataframe, invalid_classes):
+def filter_classes(dataframe, valid_classes):
     """
     Filtre les classes de la BD Forêt 
     """
-    return dataframe[~dataframe['TFV'].isin(invalid_classes)]
+    return dataframe[dataframe['TFV'].isin(valid_classes)]
 
 
 def count_polygons_by_class(dataframe, class_column='classif_pixel'):
