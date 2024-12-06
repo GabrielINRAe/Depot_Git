@@ -21,7 +21,7 @@ for i in range(len(f_vege['value'])):
 
 Masque=f_vege[['ID','Classe','value','geometry']]
 Masque.loc[:,'value']=Masque['value'].astype('uint8')
-Masque.to_file('/home/onyxia/work/data/project/mask_traite.shp')
+Masque.to_file('/home/onyxia/work/data/project/mask_traite.shp')  ##Potentiellement ça c'est un probleme si le prof à pas les dossiers projects
 
 shp=gpd.read_file('/home/onyxia/work/data/project/emprise_etude.shp')
 
@@ -32,10 +32,11 @@ out_image = os.path.join(my_folder, 'Projet_Teledec/results/data/img_pretraitees
 field_name = 'value'  # field containing the numeric label of the classes
 
 sptial_resolution = 10
-xmin = shp['MINX'][0]
-ymin = shp['MINY'][0]
-xmax = shp['MAXX'][0]
-ymax = shp['MAXY'][0]
+xmin,ymin,xmax,ymax=shp.total_bounds
+# xmin = shp['MINX'][0]
+# ymin = shp['MINY'][0]
+# xmax = shp['MAXX'][0]
+# ymax = shp['MAXY'][0]
 
 # define command pattern to fill with paremeters
 cmd_pattern = ("gdal_rasterize -a {field_name} "
