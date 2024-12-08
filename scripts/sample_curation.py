@@ -61,7 +61,7 @@ valide_classes = [
 ]
 
 # Filtrage des échantillons selon les classes valides
-filtered_samples = filter_classes(bd_foret, valide_classes)
+filtered_samples = filter_classes(bd_foret_clipped, valide_classes)
 print(filtered_samples.head())
 
 # Identification des classes dans les échantillons filtrés
@@ -71,45 +71,45 @@ print(filtered_samples_classes)
 # Création du dictionnaire de correspondance des catégories
 category_mapping = {
     "Forêt fermée d’un autre feuillu pur": {
-        "nom_pixel": "Autres feuillus",
+        "classif_pixel": "Autres feuillus",
         "Code_pixel": "11",
-        "Objet_nom": "Autres feuillus",
+        "classif_objet": "Autres feuillus",
         "Objet_code": "11",
     },
     "Forêt fermée de châtaignier pur": {
-        "nom_pixel": "Autres feuillus",
+        "classif_pixel": "Autres feuillus",
         "Code_pixel": "11",
-        "Objet_nom": "Autres feuillus",
+        "classif_objet": "Autres feuillus",
         "Objet_code": "11",
     },
     "Forêt fermée de hêtre pur": {
-        "nom_pixel": "Autres feuillus",
+        "classif_pixel": "Autres feuillus",
         "Code_pixel": "11",
-        "Objet_nom": "Autres feuillus",
+        "classif_objet": "Autres feuillus",
         "Objet_code": "11",
     },
     "Forêt fermée de chênes décidus purs": {
-        "nom_pixel": "Chêne",
+        "classif_pixel": "Chêne",
         "Code_pixel": "12",
-        "Objet_nom": "Chêne",
+        "classif_objet": "Chêne",
         "Objet_code": "12",
     },
     "Forêt fermée de robinier pur": {
-        "nom_pixel": "Robinier",
+        "classif_pixel": "Robinier",
         "Code_pixel": "13",
-        "Objet_nom": "Robinier",
+        "classif_objet": "Robinier",
         "Objet_code": "13",
     },
     "Peupleraie": {
-        "nom_pixel": "Peupleraie",
+        "classif_pixel": "Peupleraie",
         "Code_pixel": "14",
-        "Objet_nom": "Peupleraie",
+        "classif_objet": "Peupleraie",
         "Objet_code": "14",
     },
     "Forêt fermée à mélange de feuillus": {
-        "nom_pixel": "",
+        "classif_pixel": "",
         "Code_pixel": "",
-        "Objet_nom": "Mélange de feuillus",
+        "classif_objet": "Mélange de feuillus",
         "Objet_code": "15",
     },
     # Ajoutez le reste des catégories ici...
