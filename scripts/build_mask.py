@@ -2,32 +2,32 @@ import geopandas as gpd
 import numpy as np
 import os
 
-f_vege=gpd.read_file('/home/onyxia/work/data/project/FORMATION_VEGETALE.shp')
-L_mask=['Lande','Formation herbacée','Forêt ouverte de conifères purs','Forêt ouverte de feuillus purs','Forêt ouverte sans couvert arboré',
+f_vege = gpd.read_file('/home/onyxia/work/data/project/FORMATION_VEGETALE.shp')
+L_mask = ['Lande','Formation herbacée','Forêt ouverte de conifères purs','Forêt ouverte de feuillus purs','Forêt ouverte sans couvert arboré',
         'Forêt ouverte à mélange de feuillus et conifères','Forêt fermée sans couvert arboré']
-ones=np.ones((24041,1),dtype=int)
-f_vege['value']=ones
+ones = np.ones((24041,1),dtype=int)
+f_vege['value'] = ones
 
 for i,j in zip(f_vege['TFV'],range(len(f_vege['value']))):
     if i in L_mask:
         #f_vege['mask'][j]=0
-        f_vege.loc[j,'value']=0
+        f_vege.loc[j,'value'] = 0
 
 for i in range(len(f_vege['value'])):
-    if f_vege['value'][i]==1:
-        f_vege['Classe']='Zone de forêt'
+    if f_vege['value'][i] == 1:
+        f_vege['Classe'] = 'Zone de forêt'
     else:
-        f_vege['Classe']='Zone hors forêt'
+        f_vege['Classe'] = 'Zone hors forêt'
 
-Masque=f_vege[['ID','Classe','value','geometry']]
-Masque.loc[:,'value']=Masque['value'].astype('uint8')
+Masque = f_vege[['ID','Classe','value','geometry']]
+Masque.loc[:,'value'] = Masque['value'].astype('uint8')
 Masque.to_file('/home/onyxia/work/data/project/mask_traite.shp')  ##Potentiellement ça c'est un probleme si le prof à pas les dossiers projects
 
-shp=gpd.read_file('/home/onyxia/work/data/project/emprise_etude.shp')
+shp = gpd.read_file('/home/onyxia/work/data/project/emprise_etude.shp')
 
 ## Rasterization
-my_folder='/home/onyxia/work'
-in_vector= os.path.join(my_folder, 'data/project/mask_traite.shp')
+my_folder = '/home/onyxia/work'
+in_vector = os.path.join(my_folder, 'data/project/mask_traite.shp')
 out_image = os.path.join(my_folder, 'Projet_Teledec/results/data/img_pretraitees/masque_foret.tif')
 field_name = 'value'  # field containing the numeric label of the classes
 
