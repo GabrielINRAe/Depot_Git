@@ -1,5 +1,5 @@
 # Pour charger vous images dans le workspace tapez la commande en changeant votre nom d'utilisateur:
-# mc cp -r s3/nom_utilisateur/diffusion/images /home/onyxia/work/data
+# mc cp -r s3/gabgab/diffusion/images /home/onyxia/work/data
 
 import geopandas as gpd
 import rasterio
