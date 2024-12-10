@@ -20,7 +20,7 @@ os.makedirs(output_dir, exist_ok=True)
 
 # Partie 1 : Image multibande
 output_multiband_path = os.path.join(output_dir, "Serie_temp_S2_allbands.tif")
-bands_to_use = [2, 3, 4, 5, 6, 7, 8, 9, 11, 12]
+bands_to_use = [2, 3, 4, 5, 6, 7, 8, 9, 11, 12] #Pas de bandes 9 c'ets la 8A
 
 # Création d'une image multibande
 driver = gdal.GetDriverByName('GTiff')
