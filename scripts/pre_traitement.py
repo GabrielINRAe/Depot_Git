@@ -63,13 +63,18 @@ for img in L_images_clip:
     path = os.path.join(output_dir,img) 
     array = rw.load_img_as_array(path)
     L_array.append(array)
+    print(f"Bande {i+1}/{len(L_images_clip)} concaténée")
 
 # Concat array
+print("Concaténation en cours")
 array_final = np.concatenate(L_array,axis = 2)
+print("Tableau concaténé")
 
 # Save array into image
 out = "/home/onyxia/work/Projet_Teledec/results/data/img_pretraitees/Serie_temp_S2_allbands.tif"
+print("Ecriture en cours")
 rw.write_image(out_filename=out, array = array_final, data_set = rw.open_image(ref_raster_path))
+print("Ecriture terminée")
 
 # Nettoyage des dossiers
 supprimer_dossier_non_vide("/home/onyxia/work/output")
