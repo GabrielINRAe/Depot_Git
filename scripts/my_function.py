@@ -157,3 +157,17 @@ def save_raster(data, ref_raster_path, output_path, dtype, nodata):
     ref = gdal.Open(ref_raster_path)
     driver = gdal.GetDriverByName('GTiff')
 
+def supprimer_dossier_non_vide(dossier):
+    '''
+    Permet de supprimer un dossier contenant des fichiers
+    '''
+    # Parcourir tout le contenu du dossier
+    for element in os.listdir(dossier):
+        chemin_element = os.path.join(dossier, element)
+        # Vérifier si c'est un fichier
+        if os.path.isfile(chemin_element) or os.path.islink(chemin_element):
+            os.remove(chemin_element)  # Supprimer le fichier ou le lien
+        elif os.path.isdir(chemin_element):
+            supprimer_dossier_non_vide(chemin_element)  # Appel récursif pour les sous-dossiers
+    # Supprimer le dossier une fois qu'il est vide
+    os.rmdir(dossier)
