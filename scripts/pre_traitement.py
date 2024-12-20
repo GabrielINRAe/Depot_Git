@@ -18,6 +18,8 @@ shapefile_path = "/home/onyxia/work/data/project/emprise_etude.shp"
 output_dir = "/home/onyxia/work/output"
 os.makedirs(output_dir, exist_ok=True)
 
+masque_path = "/home/onyxia/work/Depot_Git/results/data/img_pretraitees/masque_foret.tif"
+
 # Charger le vecteur avec Geopandas
 emprise = gpd.read_file(shapefile_path).to_crs("EPSG:2154")
 
@@ -58,12 +60,14 @@ x,y = rw.get_image_dimension(rw.open_image(ref_raster_path))[:2]
 bandes = 60
 array_tot = np.zeros((x,y,bandes))
 
+masque = rw.load_img_as_array(masque_path)
+
 L_array = []
 for img in L_images_clip:
     path = os.path.join(output_dir,img) 
     array = rw.load_img_as_array(path)
-    L_array.append(array)
-    print(f"Bande {i+1}/{len(L_images_clip)} concaténée")
+    array_masqued = array * masque
+    L_array.append(array_masqued)
 
 # Concat array
 print("Concaténation en cours")
@@ -71,7 +75,7 @@ array_final = np.concatenate(L_array,axis = 2)
 print("Tableau concaténé")
 
 # Save array into image
-out = "/home/onyxia/work/Depot_Git/results/data/img_pretraitees/Serie_temp_S2_allbands.tif"
+out = "/home/onyxia/work/Depot_Git/results/data/img_pretraitees/Serie_temp_S2_allbands_masqued.tif"
 print("Ecriture en cours")
 rw.write_image(out_filename=out, array = array_final, data_set = rw.open_image(ref_raster_path))
 print("Ecriture terminée")
