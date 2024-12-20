@@ -28,7 +28,7 @@ shp = gpd.read_file('/home/onyxia/work/data/project/emprise_etude.shp')
 ## Rasterization
 my_folder = '/home/onyxia/work'
 in_vector = os.path.join(my_folder, 'data/project/mask_traite.shp')
-out_image = os.path.join(my_folder, 'Projet_Teledec/results/data/img_pretraitees/masque_foret.tif')
+out_image = os.path.join(my_folder, 'Depot_Git/results/data/img_pretraitees/masque_foret.tif')
 field_name = 'value'  # field containing the numeric label of the classes
 
 sptial_resolution = 10

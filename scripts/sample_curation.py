@@ -6,11 +6,11 @@ from my_function import filter_classes
 import pandas as pd
 
 # Ajout du chemin au PATH
-sys.path.append('/home/onyxia/Projet_Teledec/scripts')
+sys.path.append('/home/onyxia/Depot_Git/scripts')
 
 # definition des paramètres 
 my_folder = '/home/onyxia/work/data/project'
-out_folder = '/home/onyxia/Projet_Teledec/results/data'
+out_folder = '/home/onyxia/Depot_Git/results/data'
 in_vector = os.path.join(my_folder, 'FORMATION_VEGETALE.shp')
 emprise_path = os.path.join(my_folder, 'emprise_etude.shp')
 out_file = os.path.join(out_folder, 'sample/Sample_BD_foret_T31TCJ.shp')

@@ -8,17 +8,17 @@ import geopandas as gpd
 import pandas as pd
 from rasterstats import zonal_stats
 import sys
-sys.path.append('/home/onyxia/work/Projet_Teledec/scripts')
+sys.path.append('/home/onyxia/work/Depot_Git/scripts')
 
 # Définition des paramètres
-my_folder = '/home/onyxia/work/Projet_Teledec/results/data/sample'
-out_folder = '/home/onyxia/work/Projet_Teledec/results/figure'
+my_folder = '/home/onyxia/work/Depot_Git/results/data/sample'
+out_folder = '/home/onyxia/work/Depot_Git/results/figure'
 in_vector = os.path.join(my_folder, 'Sample_BD_foret_T31TCJ.shp')
 diag_baton_poly_classe_path = os.path.join(out_folder, 'diag_baton_nb_poly_by_class.png')
 diag_baton_pixel_classe_path = os.path.join(out_folder, 'diag_baton_nb_pix_by_class.png')
 violin_plot_path = os.path.join(out_folder, 'violin_plot_nb_pix_by_poly_by_class.png')
 violin_plot_filt_path = os.path.join(out_folder, 'violin_plot_nb_pix_by_poly_by_class_filtred.png')
-raster_path = "/home/onyxia/work/Projet_Teledec/results/data/img_pretraitees/masque_foret.tif"
+raster_path = "/home/onyxia/work/Depot_Git/results/data/img_pretraitees/masque_foret.tif"
 
 # Chargement des données de BD_Forêt
 echantillons = gpd.read_file(in_vector)

@@ -1,6 +1,6 @@
 import os
 import sys 
-sys.path.append('/home/onyxia/Projet_Teledec/scripts')
+sys.path.append('/home/onyxia/Depot_Git/scripts')
 import numpy as np
 from osgeo import gdal
 from my_function import (
@@ -13,7 +13,7 @@ from my_function import (
 
 input_raster_dir = "/home/onyxia/work/data/images"
 shapefile_path = "/home/onyxia/work/data/project/emprise_etude.shp"
-mask_foret_path = "/home/onyxia/Projet_Teledec/results/data/img_pretraitees/masque_foret.tif"
+mask_foret_path = "/home/onyxia/Depot_Git/results/data/img_pretraitees/masque_foret.tif"
 output_dir = "/home/onyxia/work"
 
 os.makedirs(output_dir, exist_ok=True)

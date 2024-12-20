@@ -71,7 +71,7 @@ array_final = np.concatenate(L_array,axis = 2)
 print("Tableau concaténé")
 
 # Save array into image
-out = "/home/onyxia/work/Projet_Teledec/results/data/img_pretraitees/Serie_temp_S2_allbands.tif"
+out = "/home/onyxia/work/Depot_Git/results/data/img_pretraitees/Serie_temp_S2_allbands.tif"
 print("Ecriture en cours")
 rw.write_image(out_filename=out, array = array_final, data_set = rw.open_image(ref_raster_path))
 print("Ecriture terminée")
