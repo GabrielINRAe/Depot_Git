@@ -66,8 +66,9 @@ L_array = []
 for img in L_images_clip:
     path = os.path.join(output_dir,img) 
     array = rw.load_img_as_array(path)
-    array_masqued = array * masque
-    L_array.append(array_masqued)
+    L_array.append(array)    # Sans le masque
+    # array_masqued = array * masque    # Avec le masque
+    # L_array.append(array_masqued)     # Avec le masque
 
 # Concat array
 print("Concaténation en cours")
@@ -75,7 +76,7 @@ array_final = np.concatenate(L_array,axis = 2)
 print("Tableau concaténé")
 
 # Save array into image
-out = "/home/onyxia/work/Depot_Git/results/data/img_pretraitees/Serie_temp_S2_allbands_masqued.tif"
+out = "/home/onyxia/work/Depot_Git/results/data/img_pretraitees/Serie_temp_S2_allbands_nomask.tif"
 print("Ecriture en cours")
 rw.write_image(out_filename=out, array = array_final, data_set = rw.open_image(ref_raster_path))
 print("Ecriture terminée")
