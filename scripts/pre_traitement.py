@@ -62,23 +62,25 @@ array_tot = np.zeros((x,y,bandes))
 
 masque = rw.load_img_as_array(masque_path)
 
-L_array = []
-for img in L_images_clip:
-    path = os.path.join(output_dir,img) 
-    array = rw.load_img_as_array(path)
-    L_array.append(array)    # Sans le masque
-    # array_masqued = array * masque    # Avec le masque
-    # L_array.append(array_masqued)     # Avec le masque
+# Initialisation de la liste pour stocker les arrays masqués
+L_array_masqued = []
 
-# Concat array
+# Parcourir toutes les images de L_images_clip
+for i, img in enumerate(L_images_clip):
+    path = os.path.join(output_dir, img)
+    array = rw.load_img_as_array(path)
+    array_masqued = np.where(masque == 1, array, 0)
+    L_array_masqued.append(array_masqued)
+
+# Concaténation des arrays masqués
 print("Concaténation en cours")
-array_final = np.concatenate(L_array,axis = 2)
-print("Tableau concaténé")
+array_final_masqued = np.concatenate(L_array_masqued, axis=2)
+print("Tableau concaténé avec masque appliqué")
 
 # Save array into image
-out = "/home/onyxia/work/Depot_Git/results/data/img_pretraitees/Serie_temp_S2_allbands_nomask.tif"
+out_masqued = "/home/onyxia/work/Depot_Git/results/data/img_pretraitees/Serie_temp_S2_allbands.tif"
 print("Ecriture en cours")
-rw.write_image(out_filename=out, array = array_final, data_set = rw.open_image(ref_raster_path))
+rw.write_image(out_filename=out_masqued, array=array_final_masqued, data_set=rw.open_image(ref_raster_path))
 print("Ecriture terminée")
 
 # Nettoyage des dossiers
