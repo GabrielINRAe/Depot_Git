@@ -10,7 +10,6 @@ import pandas as pd
 from rasterio.features import rasterize
 from sklearn.ensemble import RandomForestClassifier
 import matplotlib.pyplot as plt
-import seaborn as sns
 
 def filter_classes(dataframe, valid_classes):
     """
