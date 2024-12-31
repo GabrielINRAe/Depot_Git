@@ -22,6 +22,7 @@ for i in range(len(f_vege['value'])):
 Masque = f_vege[['ID','Classe','value','geometry']]
 Masque.loc[:,'value'] = Masque['value'].astype('uint8')
 Masque.to_file('/home/onyxia/work/data/project/mask_traite.shp')  ##Potentiellement ça c'est un probleme si le prof à pas les dossiers projects
+# Change et met dans ton dossier output comme pour pretraitement
 
 shp = gpd.read_file('/home/onyxia/work/data/project/emprise_etude.shp')
 
