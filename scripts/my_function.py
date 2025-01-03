@@ -156,6 +156,7 @@ def save_raster(data, ref_raster_path, output_path, dtype, nodata):
     ref = gdal.Open(ref_raster_path)
     driver = gdal.GetDriverByName('GTiff')
 
+
 def supprimer_dossier_non_vide(dossier):
     '''
     Permet de supprimer un dossier contenant des fichiers
