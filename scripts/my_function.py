@@ -2,6 +2,7 @@
 # mc cp -r s3/gabgab/diffusion/images /home/onyxia/work/data
 
 import os
+import seaborn as sns
 import geopandas as gpd
 import rasterio
 from osgeo import gdal, ogr
