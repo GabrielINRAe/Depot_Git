@@ -39,6 +39,10 @@ xmin,ymin,xmax,ymax=shp.total_bounds
 # xmax = shp['MAXX'][0]
 # ymax = shp['MAXY'][0]
 
+# Créer le répertoire de sortie si nécessaire
+out_dir = os.path.dirname(out_image)
+os.makedirs(out_dir, exist_ok=True)  # Crée les répertoires manquants
+
 # define command pattern to fill with paremeters
 cmd_pattern = ("gdal_rasterize -a {field_name} "
                "-tr {sptial_resolution} {sptial_resolution} "
@@ -51,4 +55,4 @@ cmd = cmd_pattern.format(in_vector=in_vector, xmin=xmin, ymin=ymin, xmax=xmax,
                          sptial_resolution=sptial_resolution)
 
 # execute the command in the terminal
-os.system(cmd)
+os.system(cmd)3
