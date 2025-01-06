@@ -22,8 +22,8 @@ def sel_classif_pixel(dataframe):
     """
     Sélectionne seuelement les classes pour la classification à l'échelle des pixels
     """
-    codes = ['11','12','13','14','21','22','23','24','25']
-    return dataframe[dataframe['Code'].isin(codes)]
+    codes = [11,12,13,14,21,22,23,24,25]
+    return dataframe[dataframe['Code'].isin(codes)].astype("uint8")
 
 def count_polygons_by_class(dataframe, class_column='classif_objet'):
     """
