@@ -149,4 +149,4 @@ print("Ecriture terminée")
 
 
 ## Nettoyage des dossiers
-supprimer_dossier_non_vide("/home/onyxia/work/output")
+supprimer_dossier_non_vide(output_dir)
