@@ -55,4 +55,4 @@ cmd = cmd_pattern.format(in_vector=in_vector, xmin=xmin, ymin=ymin, xmax=xmax,
                          sptial_resolution=sptial_resolution)
 
 # execute the command in the terminal
-os.system(cmd)3
+os.system(cmd)
