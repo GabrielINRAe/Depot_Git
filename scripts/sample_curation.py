@@ -69,29 +69,30 @@ filtered_samples_classes = filtered_samples["TFV"].unique()
 print(filtered_samples_classes)
 
 # Création du dictionnaire de correspondance des catégories
+# IMPORTANT : Laisser les codes en int c'est nécessaires pour la rasterisation
 category_mapping = {
-    'Forêt fermée d’un autre feuillu pur': {'Nom': 'Autres feuillus', 'Code': '11'},
-    'Forêt fermée de châtaignier pur': {'Nom': 'Autres feuillus', 'Code': '11'},
-    'Forêt fermée de hêtre pur': {'Nom': ' Autres feuillus', 'Code': '11'},
-    'Forêt fermée de chênes décidus purs': {'Nom': 'Chêne', 'Code': '12'},
-    'Forêt fermée de robinier pur': {'Nom': 'Robinier', 'Code': '13'},
-    'Peupleraie': {'Nom': 'Peupleraie', 'Code': '14'},
-    'Forêt fermée à mélange de feuillus': {'Nom': 'Mélange de feuillus', 'Code': '15'},
-    'Forêt fermée de feuillus purs en îlots': {'Nom': 'Feuillus en îlots', 'Code': '16'},
-    'Forêt fermée d’un autre conifère pur autre que pin': {'Nom': 'Autres conifères autre que pin', 'Code': '21'},
-    'Forêt fermée de mélèze pur': {'Nom': 'Autres conifères autre que pin', 'Code': '21'},
-    'Forêt fermée de sapin ou épicéa': {'Nom': 'Autres conifères autre que pin', 'Code': '21'},
-    'Forêt fermée à mélange d’autres conifères': {'Nom': 'Autres conifères autre que pin', 'Code': '21'},
-    'Forêt fermée d’un autre pin pur': {'Nom': 'Autres Pin', 'Code': '22'},
-    'Forêt fermée de pin sylvestre pur': {'Nom': 'Autres Pin', 'Code': '22'},
-    'Forêt fermée à mélange de pins purs': {'Nom': 'Autres Pin', 'Code': '22'},
-    'Forêt fermée de douglas pur': {'Nom': 'Douglas', 'Code': '23'},
-    'Forêt fermée de pin laricio ou pin noir pur': {'Nom': 'Pin laricio ou pin noir', 'Code': '24'},
-    'Forêt fermée de pin maritime pur': {'Nom': 'Pin_maritime', 'Code': '25'},
-    'Forêt fermée à mélange de conifères': {'Nom': 'Mélange conifères', 'Code': '26'},
-    'Forêt fermée de conifères purs en îlots': {'Nom': 'Conifères en îlots', 'Code': '27'},
-    'Forêt fermée à mélange de conifères prépondérants et feuillus': {'Nom': 'Mélange de conifères prépondérants et_feuillus', 'Code': '28'},
-    'Forêt fermée à mélange de feuillus prépondérants et conifères': {'Nom': 'Mélange_de_feuillus prépondérants et conifères', 'Code': '29'},
+    'Forêt fermée d’un autre feuillu pur': {'Nom': 'Autres feuillus', 'Code': 11},
+    'Forêt fermée de châtaignier pur': {'Nom': 'Autres feuillus', 'Code': 11},
+    'Forêt fermée de hêtre pur': {'Nom': ' Autres feuillus', 'Code': 11},
+    'Forêt fermée de chênes décidus purs': {'Nom': 'Chêne', 'Code': 12},
+    'Forêt fermée de robinier pur': {'Nom': 'Robinier', 'Code': 13},
+    'Peupleraie': {'Nom': 'Peupleraie', 'Code': 14},
+    'Forêt fermée à mélange de feuillus': {'Nom': 'Mélange de feuillus', 'Code': 15},
+    'Forêt fermée de feuillus purs en îlots': {'Nom': 'Feuillus en îlots', 'Code': 16},
+    'Forêt fermée d’un autre conifère pur autre que pin': {'Nom': 'Autres conifères autre que pin', 'Code': 21},
+    'Forêt fermée de mélèze pur': {'Nom': 'Autres conifères autre que pin', 'Code': 21},
+    'Forêt fermée de sapin ou épicéa': {'Nom': 'Autres conifères autre que pin', 'Code': 21},
+    'Forêt fermée à mélange d’autres conifères': {'Nom': 'Autres conifères autre que pin', 'Code': 21},
+    'Forêt fermée d’un autre pin pur': {'Nom': 'Autres Pin', 'Code': 22},
+    'Forêt fermée de pin sylvestre pur': {'Nom': 'Autres Pin', 'Code': 22},
+    'Forêt fermée à mélange de pins purs': {'Nom': 'Autres Pin', 'Code': 22},
+    'Forêt fermée de douglas pur': {'Nom': 'Douglas', 'Code': 23},
+    'Forêt fermée de pin laricio ou pin noir pur': {'Nom': 'Pin laricio ou pin noir', 'Code': 24},
+    'Forêt fermée de pin maritime pur': {'Nom': 'Pin_maritime', 'Code': 25},
+    'Forêt fermée à mélange de conifères': {'Nom': 'Mélange conifères', 'Code': 26},
+    'Forêt fermée de conifères purs en îlots': {'Nom': 'Conifères en îlots', 'Code': 27},
+    'Forêt fermée à mélange de conifères prépondérants et feuillus': {'Nom': 'Mélange de conifères prépondérants et_feuillus', 'Code': 28},
+    'Forêt fermée à mélange de feuillus prépondérants et conifères': {'Nom': 'Mélange_de_feuillus prépondérants et conifères', 'Code': 29},
 }
 
 # Ajout des colonnes via mapping et conversion en DataFrame
@@ -99,7 +100,9 @@ df = filtered_samples.join(
     filtered_samples["TFV"].map(lambda x: category_mapping.get(x, {})).apply(pd.Series)
 )
 
-print(df.head())
+df['Code'] = df['Code'].values.astype('uint8')
+
+print(df['Code'])
 
 # Enregistrement de la couche de séléction des échantillons
 df.to_file(out_file)
