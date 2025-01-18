@@ -19,7 +19,7 @@ if ".keep" in L_images:
     L_images.remove(".keep")
 shapefile_path = "/home/onyxia/work/data/project/emprise_etude.shp"
 
-output_dir = "/home/onyxia/work/output"
+output_dir = "/home/onyxia/work/output_pretraitement"
 os.makedirs(output_dir, exist_ok=True)
 
 masque_path = "/home/onyxia/work/Depot_Git/results/data/img_pretraitees/masque_foret.tif"
@@ -62,7 +62,7 @@ geojson_str = None
 
 # Construction array
 print("Construction de l'array")
-ref_raster_path = "/home/onyxia/work/output/traitement_20220125_B2.tif"
+ref_raster_path = os.path.join(output_dir,"traitement_20220125_B2.tif")
 L_images_clip = sorted(os.listdir(output_dir))
 x,y = rw.get_image_dimension(rw.open_image(ref_raster_path))[:2]
 bandes = 60
@@ -96,7 +96,7 @@ print("Ecriture terminée")
 print("Partie ndvi")
 
 # Definitions des paramètres
-traitements_dir = "/home/onyxia/work/output"
+traitements_dir = output_dir
 L_traitements = [os.path.join(traitements_dir,i) for i in sorted(os.listdir(traitements_dir))]
 # L_traitements = os.path.join(traitements_dir,sorted(os.listdir(traitements_dir)))
 ref_raster_path = os.path.join(traitements_dir,"traitement_20220125_B2.tif")
@@ -137,4 +137,4 @@ print("Ecriture terminée")
 
 
 ## Nettoyage des dossiers
-supprimer_dossier_non_vide(output_dir)
+supprimer_dossier_non_vide(traitements_dir)
