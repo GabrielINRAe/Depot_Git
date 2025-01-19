@@ -1,6 +1,11 @@
 import geopandas as gpd
 import numpy as np
 import os
+from my_function import supprimer_dossier_non_vide
+
+output_dir = "/home/onyxia/work/output_masque"
+os.makedirs(output_dir, exist_ok=True)
+path_masque_traite = os.path.join(output_dir,'mask_traite.shp')
 
 f_vege = gpd.read_file('/home/onyxia/work/data/project/FORMATION_VEGETALE.shp')
 L_mask = ['Lande','Formation herbacée','Forêt ouverte de conifères purs','Forêt ouverte de feuillus purs','Forêt ouverte sans couvert arboré',
@@ -21,14 +26,13 @@ for i in range(len(f_vege['value'])):
 
 Masque = f_vege[['ID','Classe','value','geometry']]
 Masque.loc[:,'value'] = Masque['value'].astype('uint8')
-Masque.to_file('/home/onyxia/work/data/project/mask_traite.shp')  ##Potentiellement ça c'est un probleme si le prof à pas les dossiers projects
-# Change et met dans ton dossier output comme pour pretraitement
+Masque.to_file(path_masque_traite) 
 
 shp = gpd.read_file('/home/onyxia/work/data/project/emprise_etude.shp')
 
 ## Rasterization
 my_folder = '/home/onyxia/work'
-in_vector = os.path.join(my_folder, 'data/project/mask_traite.shp')
+in_vector = path_masque_traite
 out_image = os.path.join(my_folder, 'Depot_Git/results/data/img_pretraitees/masque_foret.tif')
 field_name = 'value'  # field containing the numeric label of the classes
 
@@ -56,3 +60,5 @@ cmd = cmd_pattern.format(in_vector=in_vector, xmin=xmin, ymin=ymin, xmax=xmax,
 
 # execute the command in the terminal
 os.system(cmd)
+
+supprimer_dossier_non_vide(output_dir)
