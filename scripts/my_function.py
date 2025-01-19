@@ -4,7 +4,6 @@
 import os
 import seaborn as sns
 import geopandas as gpd
-import rasterio
 from osgeo import gdal, ogr
 import numpy as np
 import pandas as pd
@@ -40,44 +39,6 @@ def compute_ndvi(red_band, nir_band):
     red_band = red_band.astype('float32')
     ndvi = (nir_band - red_band) / (nir_band + red_band)
     return ndvi
-
-
-def calculate_spectral_variability(samples, raster_path):
-    """
-    Calcule la distance moyenne au centroïde par classe pour un raster donné.
-    """
-    with rasterio.open(raster_path) as src:
-        data = src.read()
-
-    results = {}
-    for class_label in np.unique(samples['class']):
-        pixels = data[samples['class'] == class_label]
-        centroid = np.mean(pixels, axis=0)
-        distances = np.sqrt(np.sum((pixels - centroid) ** 2, axis=1))
-        results[class_label] = np.mean(distances)
-
-    return results
-
-
-def train_random_forest(samples, features, target):
-    """
-    Entraîne un modèle Random Forest sur les échantillons.
-    """
-    model = RandomForestClassifier(
-        max_depth=50, oob_score=True, max_samples=0.75, class_weight='balanced'
-    )
-    model.fit(features, target)
-    return model
-
-
-def save_classification(model, features, output_file):
-    """
-    Applique un modèle de classification et sauvegarde la carte en raster.
-    """
-    predictions = model.predict(features)
-    with rasterio.open(output_file, 'w', **features.meta) as dst:
-        dst.write(predictions, 1)
-
 
 def plot_bar(data, title, xlabel, ylabel, output_path):
     """
@@ -178,3 +139,21 @@ def supprimer_dossier_non_vide(dossier):
             supprimer_dossier_non_vide(chemin_element)  # Appel récursif pour les sous-dossiers
     # Supprimer le dossier une fois qu'il est vide
     os.rmdir(dossier)
+
+def report_from_dict_to_df(dict_report):
+    '''
+    Permet de convertir en DataFrame un dictionnaire retourné par la fonction classification_report
+    '''
+    # convert report into dataframe
+    report_df = pd.DataFrame.from_dict(dict_report)
+
+    # drop unnecessary rows and columns
+    try :
+        report_df = report_df.drop(['accuracy', 'macro avg', 'weighted avg'], axis=1)
+    except KeyError:
+        print(dict_report)
+        report_df = report_df.drop(['micro avg', 'macro avg', 'weighted avg'], axis=1)
+
+    report_df = report_df.drop(['support'], axis=0)
+
+    return report_df
