@@ -90,7 +90,7 @@ violin_plot(
     palette="muted"
 )
 
-# Création de "violin plot" pour visualiser la distribution du nombre de pixels par polygone, par classe sans tenir compte de la classe dominante chêne 
+# Création de "violin plot" pour visualiser la distribution du nombre de pixels par polygone, par classe sans tenir compte de la classe dominante"chêne" 
 df_filtered = df[df["Classe"] != "Chêne"]
 violin_plot(
     df = df_filtered,
