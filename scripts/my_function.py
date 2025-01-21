@@ -7,6 +7,7 @@ import geopandas as gpd
 from osgeo import gdal, ogr
 import numpy as np
 import pandas as pd
+import matplotlib
 from rasterio.features import rasterize
 from sklearn.ensemble import RandomForestClassifier
 import matplotlib.pyplot as plt
@@ -157,3 +158,88 @@ def report_from_dict_to_df(dict_report):
     report_df = report_df.drop(['support'], axis=0)
 
     return report_df
+
+
+def compute_centroid(samples):
+    """
+    Calcule le centroïde d'un ensemble de points.
+    :param samples: array, shape (n_samples, n_features)
+    :return: array, shape (n_features,)
+    """
+    return np.mean(samples, axis=0)
+
+def compute_avg_distance_to_centroid(samples, centroid):
+    """
+    Calcule la distance moyenne au centroïde.
+    :param samples: array, shape (n_samples, n_features)
+    :param centroid: array, shape (n_features,)
+    :return: float
+    """
+    distances = np.sqrt(np.sum((samples - centroid) ** 2, axis=1))
+    return np.mean(distances)
+
+def create_bar_plot(data, output_path):
+    """
+    Crée un graphique en bâton pour les distances moyennes au centroïde.
+    :param data: dict {class: avg_distance}
+    :param output_path: str, chemin du fichier de sortie
+    """
+    classes = list(data.keys())
+    distances = list(data.values())
+
+    plt.figure(figsize=(10, 6))
+    plt.bar(classes, distances, color='skyblue')
+    plt.xlabel('Classes')
+    plt.ylabel('Distance moyenne au centroïde')
+    plt.title('Distance moyenne au centroïde par classe')
+    plt.savefig(output_path)
+    plt.close()
+
+def create_violin_plot(polygon_distances, violin_plot_dist_centroide_by_poly_by_class_path):
+    """
+    Crée un graphique en violon pour visualiser les distances moyennes au centroïde par classe.
+
+    Parameters:
+    - polygon_distances (dict): Dictionnaire où les clés sont les noms des classes et les valeurs
+      sont des listes de distances moyennes des polygones de chaque classe.
+    - violin_plot_dist_centroide_by_poly_by_class_path (str): Chemin complet pour sauvegarder le graphique.
+    """
+
+    # Créer les données pour le graphique
+    class_names = list(polygon_distances.keys())
+    distances = [polygon_distances[cls] for cls in class_names]
+
+    # Créer le graphique en violon
+    plt.figure(figsize=(12, 8))
+    
+    # Vérifiez la version de Matplotlib et appliquez le paramètre approprié
+    if matplotlib.__version__ >= "3.4.0":
+        plt.violinplot(distances, showmeans=True, showextrema=True, showmedians=True)
+    else:
+        plt.violinplot(distances, showmeans=True, showextrema=True, showmedians=True)
+
+    # Ajouter des labels et un titre
+    plt.xticks(ticks=range(1, len(class_names) + 1), labels=class_names, rotation=45, fontsize=10)
+    plt.xlabel("Classes", fontsize=12)
+    plt.ylabel("Distances moyennes au centroïde", fontsize=12)
+    plt.title("Distribution des distances moyennes au centroïde par polygone et par classe", fontsize=14)
+
+    # Sauvegarder le graphique
+    plt.tight_layout()
+    plt.savefig(violin_plot_dist_centroide_by_poly_by_class_path, dpi=300)
+    plt.close()
+
+
+def get_polygon_labels(Y):
+    """
+    Fonction pour extraire les étiquettes des polygones associés aux pixels.
+
+    Arguments :
+    Y -- ndarray (numpy array) contenant les étiquettes des classes (ou autre identifiant, comme les polygones).
+
+    Retourne :
+    labels -- ndarray avec les étiquettes des polygones pour chaque pixel.
+    """
+    if Y.ndim > 1:
+        Y = Y.flatten()  # Aplatir si nécessaire
+    return Y  # Retourne directement Y s'il contient les étiquettes des polygones
