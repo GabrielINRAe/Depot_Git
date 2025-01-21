@@ -89,7 +89,7 @@ category_mapping = {
     'Forêt fermée de douglas pur': {'Nom': 'Douglas', 'Code': 23},
     'Forêt fermée de pin laricio ou pin noir pur': {'Nom': 'Pin_laricio_ou_pin_noir', 'Code': 24},
     'Forêt fermée de pin maritime pur': {'Nom': 'Pin_maritime', 'Code': 25},
-    'Forêt fermée à mélange de conifères': {'Nom': 'Mélange conifères', 'Code': 26},
+    'Forêt fermée à mélange de conifères': {'Nom': 'Mélange_coniferes', 'Code': 26},
     'Forêt fermée de conifères purs en îlots': {'Nom': 'Conifères en îlots', 'Code': 27},
     'Forêt fermée à mélange de conifères prépondérants et feuillus': {'Nom': 'Melange_de_coniferes_preponderants_et_feuillus', 'Code': 28},
     'Forêt fermée à mélange de feuillus prépondérants et conifères': {'Nom': 'Melange_de_feuillus_preponderants_et_coniferes', 'Code': 29},

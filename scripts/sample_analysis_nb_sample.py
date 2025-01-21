@@ -10,6 +10,7 @@ from my_function import (
     count_polygons_by_class,
     plot_bar,
     violin_plot,
+    sel_classif_pixel
 )
 
 # Définition des paramètres 
@@ -26,9 +27,7 @@ raster_path = "/home/onyxia/work/Depot_Git/results/data/img_pretraitees/masque_f
 echantillons = gpd.read_file(in_vector)
 
 # Ici on ne garde que les classes pour la classif pixel
-# Définition de la liste des codes pour classif pixel
-L_codes = ['11','12','13','14','21','22','23','24','25']
-echantillons_px = echantillons[echantillons['Code'].isin(L_codes)]
+echantillons_px = sel_classif_pixel(echantillons)
 
 # Visualisation sous forme d'un diagramme en bâton du nombre des polygones par classe 
 # Définition des un variable stockant le nom de colone classif polygone
@@ -90,8 +89,8 @@ violin_plot(
     palette="muted"
 )
 
-# Création de "violin plot" pour visualiser la distribution du nombre de pixels par polygone, par classe sans tenir compte de la classe dominante"chêne" 
-df_filtered = df[df["Classe"] != "Chêne"]
+# Création de "violin plot" pour visualiser la distribution du nombre de pixels par polygone, par classe sans tenir compte de la classe dominante chêne 
+df_filtered = df[df["Classe"] != "Chene"]
 violin_plot(
     df = df_filtered,
     x_col = "Classe",
