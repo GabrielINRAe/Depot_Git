@@ -3,8 +3,10 @@ import numpy as np
 import os
 from my_function import supprimer_dossier_non_vide
 
-output_dir = "/home/onyxia/work/output_masque"
-os.makedirs(output_dir, exist_ok=True)
+# Paramètres du code
+racine = "/home/onyxia/work"    # Racine du projet
+output_dir = os.path.join(racine, "output_masque")    # Dossier de sortie
+os.makedirs(output_dir, exist_ok=True)       # Crée le dossier output temporaire
 path_masque_traite = os.path.join(output_dir,'mask_traite.shp')
 
 f_vege = gpd.read_file('/home/onyxia/work/data/project/FORMATION_VEGETALE.shp')
