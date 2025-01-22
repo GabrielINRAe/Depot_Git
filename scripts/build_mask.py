@@ -1,34 +1,16 @@
 import geopandas as gpd
 import numpy as np
 import os
-from my_function import supprimer_dossier_non_vide
+from my_function import masque_shp,supprimer_dossier_non_vide
 
-# Paramètres du code
-racine = "/home/onyxia/work"    # Racine du projet
+# Paramètrage des paths
+racine = r"C:\Users\orabo\Documents\GitHub\Projet Teledec"    # Racine du projet
 output_dir = os.path.join(racine, "output_masque")    # Dossier de sortie
 os.makedirs(output_dir, exist_ok=True)       # Crée le dossier output temporaire
-path_masque_traite = os.path.join(output_dir,'mask_traite.shp')
+path_f_vege = os.path.join(racine,"data/project/FORMATION_VEGETALE.shp")    # Path pour le fichier shp formation végétale
+path_masque_traite = os.path.join(output_dir,'mask_traite.shp')    # Path pour le fichier shp masque traité 
 
-f_vege = gpd.read_file('/home/onyxia/work/data/project/FORMATION_VEGETALE.shp')
-L_mask = ['Lande','Formation herbacée','Forêt ouverte de conifères purs','Forêt ouverte de feuillus purs','Forêt ouverte sans couvert arboré',
-        'Forêt ouverte à mélange de feuillus et conifères','Forêt fermée sans couvert arboré']
-ones = np.ones((24041,1),dtype=int)
-f_vege['value'] = ones
-
-for i,j in zip(f_vege['TFV'],range(len(f_vege['value']))):
-    if i in L_mask:
-        #f_vege['mask'][j]=0
-        f_vege.loc[j,'value'] = 0
-
-for i in range(len(f_vege['value'])):
-    if f_vege['value'][i] == 1:
-        f_vege['Classe'] = 'Zone de forêt'
-    else:
-        f_vege['Classe'] = 'Zone hors forêt'
-
-Masque = f_vege[['ID','Classe','value','geometry']]
-Masque.loc[:,'value'] = Masque['value'].astype('uint8')
-Masque.to_file(path_masque_traite) 
+masque_shp(path_f_vege,path_masque_traite)
 
 shp = gpd.read_file('/home/onyxia/work/data/project/emprise_etude.shp')
 

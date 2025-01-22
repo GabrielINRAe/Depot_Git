@@ -35,6 +35,7 @@ def count_polygons_by_class(dataframe, class_column='classif_objet'):
 def compute_ndvi(red_band, nir_band):
     """
     Calcule le NDVI à partir des bandes rouge et proche infrarouge.
+    A REFAIRE PAR (GAB)
     """
     nir_band = nir_band.astype('float32')
     red_band = red_band.astype('float32')
@@ -243,3 +244,41 @@ def get_polygon_labels(Y):
     if Y.ndim > 1:
         Y = Y.flatten()  # Aplatir si nécessaire
     return Y  # Retourne directement Y s'il contient les étiquettes des polygones
+
+
+def masque_shp(path_input, path_output):
+    """
+    Permet la création du masque en format shp à partir d'un fichier formation végétale shp.
+
+    Parameters:
+        path_input (str): Chemin du fichier pour accéder au fichier formation végétale
+        path_output (str) : Chemin du fichier pour enregistrer le masque
+
+    Returns:
+        None
+    """
+    f_vege = gpd.read_file(path_input)    # Mettre le path en paramètre
+    L_mask = ['Lande',
+          'Formation herbacée',
+          'Forêt ouverte de conifères purs',
+          'Forêt ouverte de feuillus purs',
+          'Forêt ouverte sans couvert arboré',
+          'Forêt ouverte à mélange de feuillus et conifères',
+          'Forêt fermée sans couvert arboré']   # Liste des classes à masquer
+    ones = np.ones((24041,1),dtype=int)      # Création d'un vecteur de 1
+    f_vege.loc[:,'value'] = ones             # Ajout de la colonne value remplis de 1
+    # Valeur 0 pour les classes à masquer
+    for i,j in zip(f_vege['TFV'],range(len(f_vege['value']))):
+        if i in L_mask:
+            f_vege.loc[j,'value'] = 0
+    # Ajout de la colonne Classe
+    for i in range(len(f_vege['value'])):
+        if f_vege['value'][i] == 1:
+            f_vege.loc[i,'Classe'] = 'Zone de forêt'
+        else:
+            f_vege.loc[i,'Classe'] = 'Zone hors forêt'
+
+    Masque = f_vege[['ID','Classe','value','geometry']]    # Sélections des colonnes d'intérêt
+    Masque.loc[:,'value'] = Masque['value'].astype('uint8')   # Conversion de la colonne value en uint8
+
+    Masque.to_file(path_output)  # Enregistrement du masque
