@@ -4,7 +4,7 @@ import os
 from my_function import masque_shp,supprimer_dossier_non_vide
 
 # Paramètrage des paths
-racine = r"C:\Users\orabo\Documents\GitHub\Projet Teledec"    # Racine du projet
+racine = "/home/onyxia/work"    # Racine du projet
 output_dir = os.path.join(racine, "output_masque")    # Dossier de sortie
 os.makedirs(output_dir, exist_ok=True)       # Crée le dossier output temporaire
 path_f_vege = os.path.join(racine,"data/project/FORMATION_VEGETALE.shp")    # Path pour le fichier shp formation végétale
@@ -12,7 +12,7 @@ path_masque_traite = os.path.join(output_dir,'mask_traite.shp')    # Path pour l
 
 masque_shp(path_f_vege,path_masque_traite)
 
-shp = gpd.read_file('/home/onyxia/work/data/project/emprise_etude.shp')
+emprise = gpd.read_file(os.path.join(racine,"data/project/emprise_etude.shp"))
 
 ## Rasterization
 my_folder = '/home/onyxia/work'
@@ -21,7 +21,7 @@ out_image = os.path.join(my_folder, 'Depot_Git/results/data/img_pretraitees/masq
 field_name = 'value'  # field containing the numeric label of the classes
 
 sptial_resolution = 10
-xmin,ymin,xmax,ymax=shp.total_bounds
+xmin,ymin,xmax,ymax=emprise.total_bounds
 # xmin = shp['MINX'][0]
 # ymin = shp['MINY'][0]
 # xmax = shp['MAXX'][0]

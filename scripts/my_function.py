@@ -8,7 +8,6 @@ from osgeo import gdal, ogr
 import numpy as np
 import pandas as pd
 import matplotlib
-from rasterio.features import rasterize
 from sklearn.ensemble import RandomForestClassifier
 import matplotlib.pyplot as plt
 
