@@ -281,3 +281,46 @@ def masque_shp(path_input, path_output):
     Masque.loc[:,'value'] = Masque['value'].astype('uint8')   # Conversion de la colonne value en uint8
 
     Masque.to_file(path_output)  # Enregistrement du masque
+    return None
+
+
+def rasterization (
+    in_vector,
+    out_image,
+    field_name,
+    sp_resol,
+    emprise = None):
+    """
+    Rasterise un fichier vectoriel.
+
+    Parameters:
+        in_vector (str): Chemin du fichier vectoriel à rasteriser.
+        out_image (str): Chemin du fichier raster en sortie.
+        field_name (str): Nom de la colonne du vecteur à rasteriser.
+        sp_resol (str): Résolution spatiale du fichier à rasteriser.
+        emprise (str, optional): Chemin du fichier emprise sur lequel rasteriser.
+
+    Returns:
+        None
+    """
+    if emprise is not None :
+        xmin,ymin,xmax,ymax=emprise.total_bounds
+    
+    # Créer le répertoire de sortie si nécessaire
+    out_dir = os.path.dirname(out_image)
+    os.makedirs(out_dir, exist_ok=True)  # Crée les répertoires manquants
+
+    # define command pattern to fill with parameters
+    cmd_pattern = ("gdal_rasterize -a {field_name} "
+                "-tr {sp_resol} {sp_resol} "
+                "-te {xmin} {ymin} {xmax} {ymax} -ot Byte -of GTiff "
+                "{in_vector} {out_image}")
+
+    # fill the string with the parameter thanks to format function
+    cmd = cmd_pattern.format(in_vector=in_vector, xmin=xmin, ymin=ymin, xmax=xmax,
+                            ymax=ymax, out_image=out_image, field_name=field_name,
+                            sp_resol=sp_resol)
+
+    # execute the command in the terminal
+    os.system(cmd)
+    return None
