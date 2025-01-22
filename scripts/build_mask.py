@@ -1,8 +1,8 @@
 import geopandas as gpd
 import numpy as np
 import os
-from my_function import masque_shp,\
-rasterization,supprimer_dossier_non_vide
+from my_function import masque_shp,
+    rasterization,supprimer_dossier_non_vide
 
 # Paramètrage des paths
 racine = "/home/onyxia/work"    # Racine du projet
@@ -14,15 +14,16 @@ path_emprise = os.path.join(racine,"data/project/emprise_etude.shp")    # Path p
 path_masque_raster = os.path.join(racine, 'Depot_Git/results/data/img_pretraitees/masque_foret.tif')
 
 # Formatage du fichier masque en format shp à partir
-masque_shp(path_f_vege,path_masque_traite)
+masque_shp(path_input=path_f_vege,
+    path_output=path_masque_traite)
 
 # Rasterisation du fichier masque
 emprise = gpd.read_file(path_emprise)
 rasterization(
-    path_masque_traite,
-    path_masque_raster,
-    'value',
-    10,
+    in_vector=path_masque_traite,
+    out_image=path_masque_raster,
+    field_name='value',
+    sp_resol=10,
     emprise = emprise)
 
 supprimer_dossier_non_vide(output_dir)

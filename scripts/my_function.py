@@ -10,6 +10,9 @@ import pandas as pd
 import matplotlib
 from sklearn.ensemble import RandomForestClassifier
 import matplotlib.pyplot as plt
+import sys
+sys.path.append('/home/onyxia/work/libsigma')
+import read_and_write as rw
 
 def filter_classes(dataframe, valid_classes):
     """
@@ -288,8 +291,9 @@ def rasterization (
     in_vector,
     out_image,
     field_name,
-    sp_resol,
-    emprise = None):
+    sp_resol = None,
+    emprise = None,
+    ref_image = None):
     """
     Rasterise un fichier vectoriel.
 
@@ -297,14 +301,21 @@ def rasterization (
         in_vector (str): Chemin du fichier vectoriel à rasteriser.
         out_image (str): Chemin du fichier raster en sortie.
         field_name (str): Nom de la colonne du vecteur à rasteriser.
-        sp_resol (str): Résolution spatiale du fichier à rasteriser.
+        sp_resol (str,optional): Résolution spatiale du fichier à rasteriser.
         emprise (str, optional): Chemin du fichier emprise sur lequel rasteriser.
+        ref_image (str, optional): Chemin du fichier image référence pour la rasterisation.
 
     Returns:
         None
     """
     if emprise is not None :
         xmin,ymin,xmax,ymax=emprise.total_bounds
+    else : 
+        ref_image_open = rw.open_image(ref_image)
+        sp_resol = rw.get_pixel_size(ref_image_open)[0]
+        xmin,ymax = rw.get_origin_coordinates(ref_image_open)
+        y,x = rw.get_image_dimension(ref_image_open)[0:2]
+        xmax,ymin = xmin+x*10,ymax-y*10
     
     # Créer le répertoire de sortie si nécessaire
     out_dir = os.path.dirname(out_image)
