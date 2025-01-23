@@ -2,6 +2,7 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
+
 # Personal libraries
 import sys 
 sys.path.append('/home/onyxia/work/libsigma')
@@ -14,7 +15,7 @@ in_vector = os.path.join(my_folder, 'sample/Sample_BD_foret_T31TCJ.shp')
 ref_image = os.path.join(my_folder, 'img_pretraitees/Serie_temp_S2_ndvi.tif')
 out_image = os.path.splitext(in_vector)[0] + '_v2.tif'
 field_name = 'Code'  # field containing the numeric label of the classes
-output_path= os.path.join(my_folder, "../figure/temp_mean_ndvi.png")
+output_path = os.path.join(my_folder, "../figure/temp_mean_ndvi.png")
 
 # Caractéristiques de raster de référence
 sptial_resolution = 10
@@ -67,11 +68,11 @@ print(X.shape)
 print(Y.shape)
 
 # Liste de codes correspondant aux classes d'intérêt
-codes_of_interest = ['12', '13', '14', '23', '24', '25']
+list_of_interest = ['12', '13', '14', '23', '24', '25']
 
 # Filtrage des échantillons pour ne garder que les classes d'intérêt
 Y_cleaned = np.array([str(y).strip() for y in Y])  # Supprimer les espaces dans les labels
-mask = np.isin(Y.astype(str), codes_of_interest)
+mask = np.isin(Y.astype(str), list_of_interest)
 
 X_filtered = X[mask]
 Y_filtered = Y[mask]
@@ -80,6 +81,8 @@ Y_filtered = Y[mask]
 print("Shape de X_filtered:", X_filtered.shape)
 print("Shape de Y_filtered:", Y_filtered.shape)
 print("Les cinq premiers labels dans Y:", Y[:5])
+
+codes_of_interest = [12, 13, 14, 23, 24, 25]
 
 # Liste des dates relatives à chaque bande NDVI
 dates = ['2023-01-01', '2023-03-01', '2023-05-01', '2023-07-01', '2023-09-01', '2023-11-01']
