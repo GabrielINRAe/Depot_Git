@@ -395,3 +395,56 @@ def compute_confusion_matrix(polygons, label_col, prediction_col):
         "confusion_matrix": cm,
         "classification_report": report
     }
+
+
+def pre_traitement_img(
+    p_emprise,
+    l_images,
+    input_raster_dir,
+    output_dir):
+    """
+    Rasterise un fichier vectoriel.
+
+    Parameters:
+        p_emprise (str): Chemin du fichier vectoriel pour l'emprise du clip.
+        l_images (list): Liste des images à traiter
+        input_raster_dir (str): Dossier où les images brutes sont stockées
+        output_dir (str): Chemin du dossier temporaire des output pré-traités.
+
+    Returns:
+        None
+    """
+    # Charger le vecteur avec Geopandas
+    emprise = gpd.read_file(p_emprise).to_crs("EPSG:2154")
+    # Extraire le GeoJSON sous forme de string
+    print("Chargement du geojson en str")
+    geojson_str = emprise.to_json()
+    print("Chargement du geojson en str ok!")
+    print("Traitements des images")
+    for i,img in enumerate(l_images) :
+        date = img[11:19]
+        bande = img[53:]
+        ds_img = rw.open_image(os.path.join(input_raster_dir,img))
+        name_file = f"traitement_{date}_{bande}"
+        output_file = os.path.join(output_dir,name_file)
+        # Appliquer le clip avec GDAL
+        resolution = 10  # Résolution (10 m)
+        output_raster_test = gdal.Warp(
+            output_file, # Chemin de fichier, car on utilise GTiff
+            # "",  # Pas de chemin de fichier, car on utilise MEM
+            ds_img,  # Fichier en entrée (chemin ou objet gdal)
+            format = "GTiff", # Utiliser GTiff comme format
+            # format = "MEM",  # Utiliser MEM comme format
+            cutlineDSName = geojson_str,  # Passer directement le GeoJSON
+            cropToCutline = True,
+            outputType = gdal.GDT_UInt16, #UInt16
+            dstSRS = "EPSG:2154",  # Reprojection
+            xRes = resolution,  # Résolution X
+            yRes = resolution,  # Résolution Y
+            dstNodata = 0  # Valeur NoData
+        )
+        print(f"Image {i+1}/{len(l_images)} traitée")
+    ds_img = None
+    emprise = None
+    geojson_str = None
+    return None
