@@ -13,6 +13,8 @@ import matplotlib.pyplot as plt
 import sys
 sys.path.append('/home/onyxia/work/libsigma')
 import read_and_write as rw
+from rasterstats import zonal_stats
+from sklearn.metrics import confusion_matrix, classification_report
 
 def filter_classes(dataframe, valid_classes):
     """
@@ -335,3 +337,55 @@ def rasterization (
     # execute the command in the terminal
     os.system(cmd)
     return None
+
+
+def calculate_class_percentages(polygons, raster_path):
+    """
+    Calcule les pourcentages des classes dans chaque polygone.
+    """
+    stats = zonal_stats(
+        polygons,
+        raster_path,
+        stats=["sum", "count"],
+        categorical=True
+    )
+    return pd.DataFrame(stats)
+
+
+def apply_decision_rules(class_percentages):
+    """
+    Applique les règles de décision pour classifier les polygones.
+    """
+    predicted_classes = []
+
+    for index, row in class_percentages.iterrows():
+        # Récupérer les proportions de feuillus et conifères
+        sum_feuillus = row.get("Feuillus", 0)
+        sum_coniferes = row.get("Conifères", 0)
+
+        # Appliquer l'arbre de décision
+        if sum_feuillus > 75:
+            predicted_classes.append("Feuillus en ilots")
+        elif sum_coniferes > 75:
+            predicted_classes.append("Conifères en ilots")
+        elif sum_coniferes > sum_feuillus:
+            predicted_classes.append("Mélange conifères prépondérants")
+        else:
+            predicted_classes.append("Mélange feuillus prépondérants")
+
+    return predicted_classes
+
+def compute_confusion_matrix(polygons, label_col, prediction_col):
+    """
+    Calcule la matrice de confusion et affiche les métriques.
+    """
+    y_true = polygons[label_col]
+    y_pred = polygons[prediction_col]
+
+    cm = confusion_matrix(y_true, y_pred, labels=np.unique(y_true))
+    report = classification_report(y_true, y_pred)
+
+    return {
+        "confusion_matrix": cm,
+        "classification_report": report
+    }
