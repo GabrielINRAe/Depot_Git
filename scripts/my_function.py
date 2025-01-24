@@ -13,6 +13,8 @@ import matplotlib.pyplot as plt
 import sys
 sys.path.append('/home/onyxia/work/libsigma')
 import read_and_write as rw
+from rasterstats import zonal_stats
+from sklearn.metrics import confusion_matrix, classification_report
 
 def filter_classes(dataframe, valid_classes):
     """
