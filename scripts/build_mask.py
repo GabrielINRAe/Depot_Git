@@ -1,8 +1,8 @@
 import geopandas as gpd
 import numpy as np
 import os
-from my_function import masque_shp,
-    rasterization,supprimer_dossier_non_vide
+from my_function import (masque_shp,
+    rasterization,supprimer_dossier_non_vide)
 
 # Paramètrage des paths
 racine = "/home/onyxia/work"    # Racine du projet
