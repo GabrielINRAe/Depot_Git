@@ -295,7 +295,8 @@ def rasterization (
     field_name,
     sp_resol = None,
     emprise = None,
-    ref_image = None):
+    ref_image = None,
+    dtype = None):
     """
     Rasterise un fichier vectoriel.
 
@@ -306,15 +307,20 @@ def rasterization (
         sp_resol (str,optional): Résolution spatiale du fichier à rasteriser.
         emprise (str, optional): Chemin du fichier emprise sur lequel rasteriser.
         ref_image (str, optional): Chemin du fichier image référence pour la rasterisation.
+        dtype (str, optional) : Type de données en sortie.
 
     Returns:
         None
     """
     if emprise is not None :
         xmin,ymin,xmax,ymax=emprise.total_bounds
-    else : 
+    else :
         ref_image_open = rw.open_image(ref_image)
-        sp_resol = rw.get_pixel_size(ref_image_open)[0]
+        if sp_resol is None :
+            sp_resol = rw.get_pixel_size(ref_image_open)[0]
+        if dtype is None :
+            band = ref_image_open.GetRasterBand(1)
+            dtype = gdal.GetDataTypeName(band.DataType)
         xmin,ymax = rw.get_origin_coordinates(ref_image_open)
         y,x = rw.get_image_dimension(ref_image_open)[0:2]
         xmax,ymin = xmin+x*10,ymax-y*10
@@ -326,13 +332,13 @@ def rasterization (
     # define command pattern to fill with parameters
     cmd_pattern = ("gdal_rasterize -a {field_name} "
                 "-tr {sp_resol} {sp_resol} "
-                "-te {xmin} {ymin} {xmax} {ymax} -ot Byte -of GTiff "
+                "-te {xmin} {ymin} {xmax} {ymax} -ot {dtype} -of GTiff "
                 "{in_vector} {out_image}")
 
     # fill the string with the parameter thanks to format function
     cmd = cmd_pattern.format(in_vector=in_vector, xmin=xmin, ymin=ymin, xmax=xmax,
                             ymax=ymax, out_image=out_image, field_name=field_name,
-                            sp_resol=sp_resol)
+                            sp_resol=sp_resol, dtype = dtype)
 
     # execute the command in the terminal
     os.system(cmd)
