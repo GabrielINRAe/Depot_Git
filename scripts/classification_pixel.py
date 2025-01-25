@@ -40,11 +40,6 @@ path_sample_px_centroid = os.path.join(output_dir,"sample_px_centroid.shp")
 path_sample_px_id = os.path.join(output_dir,"sample_px_id.shp")
 path_rasterized_sample_id = os.path.join(output_dir, "rasterized_sample_id.tif")
 
-suffix = '_CV{}folds_stratified_group_x{}times'.format(nb_folds, nb_iter)
-out_figs_dir = os.path.join(racine,"Depot_Git/results/figure")    # Enregistrement des plots de qualités
-out_matrix = os.path.join(out_figs_dir, 'matrice{}.png'.format(suffix))
-out_qualite = os.path.join(out_figs_dir, 'qualites{}.png'.format(suffix))
-
 out_classif = os.path.join(racine, "Depot_Git/results/data/classif/carte_essences_echelle_pixel.tif")
 
 # Save d'un vecteur echantillons avec que les données pour classif pixel
@@ -98,6 +93,11 @@ for cm in list_cm:
 print(len(list_cm_2))
 
 ## Plots
+suffix = '_CV{}folds_stratified_group_x{}times'.format(nb_folds, nb_iter)
+out_figs_dir = os.path.join(racine,"Depot_Git/results/figure")
+out_matrix = os.path.join(out_figs_dir, 'matrice{}.png'.format(suffix))
+out_qualite = os.path.join(out_figs_dir, 'qualites{}.png'.format(suffix))
+
 # compute mean of cm
 array_cm = np.array(list_cm_2)
 mean_cm = array_cm.mean(axis=0)
