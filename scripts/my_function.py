@@ -13,8 +13,11 @@ import matplotlib.pyplot as plt
 import sys
 sys.path.append('/home/onyxia/work/libsigma')
 import read_and_write as rw
+import classification as cla
 from rasterstats import zonal_stats
-from sklearn.metrics import confusion_matrix, classification_report
+from sklearn.metrics import (confusion_matrix, classification_report,
+    accuracy_score)
+from sklearn.model_selection import StratifiedGroupKFold
 
 def filter_classes(dataframe, valid_classes):
     """
@@ -407,12 +410,12 @@ def pre_traitement_img(
 
     Parameters:
         p_emprise (str): Chemin du fichier vectoriel pour l'emprise du clip.
-        l_images (list): Liste des images à traiter
-        input_raster_dir (str): Dossier où les images brutes sont stockées
+        l_images (list): Liste des images à traiter.
+        input_raster_dir (str): Dossier où les images brutes sont stockées.
         output_dir (str): Chemin du dossier temporaire des output pré-traités.
 
     Returns:
-        None
+        None.
     """
     # Charger le vecteur avec Geopandas
     emprise = gpd.read_file(p_emprise).to_crs("EPSG:2154")
@@ -447,4 +450,118 @@ def pre_traitement_img(
     ds_img = None
     emprise = None
     geojson_str = None
+    return None
+
+
+def id_construction(sample_px, path_sample_px_id):
+    """
+    Construis un fichier shp avec une colonne "id" sur les polygones.
+
+    Parameters:
+        sample_px (str): Chemin du fichier où ajouter les id.
+        path_sample_px_id (str): Chemin du fichier id en sortie.
+
+    Returns:
+        None
+    """
+    l_id = [i+1 for i in range(sample_px.shape[0])]
+    sample_px_id = sample_px.copy()
+    sample_px_id['id'] = l_id
+    sample_px_id = sample_px_id[['id','geometry']]
+    sample_px_id.to_file(path_sample_px_id)
+    return None
+
+
+def stratified_grouped_validation(
+    nb_iter,
+    nb_folds,
+    sample_filename,
+    image_filename,
+    id_filename
+):
+    """
+    Réalise l'entrainement et la validation du modèle.
+
+    Parameters:
+        nb_iter (int): Nombre d'itération.
+        nb_folds (int): Nombre de folds.
+        sample_filename (str): Chemin vers le raster des échantillons.
+        image_filename (str): Chemin vers l'image sur laquelle entrainer le modèle.
+        id_filename (str): Chemin vers le raster des id des polygones.
+
+    Returns:
+        rfc: Retourne le modèle.
+        list_cm: Liste des matrices de confusions.
+        list_accuracy: Liste des scores de précisions.
+        list_report: Liste des rapports de classifications.
+        Y_predict: Utilisé pour les labels pour le plot.
+    """
+    # Extraction des échantillons
+    X, Y, t = cla.get_samples_from_roi(image_filename, sample_filename)
+    _, groups, _ = cla.get_samples_from_roi(image_filename, id_filename)
+    list_cm = []   # Stockage des matrices de confusions
+    list_accuracy = []    # Stockage des OA
+    list_report = []    # Stockage des rapports de classifications
+    groups = np.squeeze(groups)
+    # Iter on stratified K fold
+    for i in range(nb_iter):
+        print (f"Début de la {i+1} itération")
+        kf = StratifiedGroupKFold(n_splits=nb_folds, shuffle=True)
+        for train, test in kf.split(X, Y, groups=groups):
+            X_train, X_test = X[train], X[test]
+            Y_train, Y_test = Y[train], Y[test]
+
+            # 3 --- Train
+            rfc = RandomForestClassifier(
+                max_depth = 50,
+                oob_score = True,
+                max_samples = 0.75,
+                class_weight = 'balanced',
+                n_jobs = -1
+            )
+            rfc.fit(X_train, Y_train[:,0])
+
+            # 4 --- Test
+            Y_predict = rfc.predict(X_test)
+
+            # compute quality
+            list_cm.append(confusion_matrix(Y_test, Y_predict))
+            list_accuracy.append(accuracy_score(Y_test, Y_predict))
+            report = classification_report(Y_test, Y_predict,
+                                            labels=np.unique(Y_predict),
+                                            output_dict=True,
+                                            zero_division = 0)
+
+            # store them
+            list_report.append(report_from_dict_to_df(report))
+    return rfc, list_cm, list_accuracy, list_report, Y_predict
+
+
+def save_classif(
+    image_filename,
+    model,
+    out_classif
+):
+    """
+    Produit la carte finale de classification.
+
+    Parameters:
+        image_filename (str): Chemin du fichier vers l'image utilisée pour la classification.
+        model (sklearn): Modèle utilisé lors de l'apprentissage.
+        out_classif (str): Chemin de sauvegarde de la classif finale.
+
+    Returns:
+        None
+    """
+    X_img, _, t_img = cla.get_samples_from_roi(image_filename, image_filename)
+    Y_predict = model.predict(X_img)
+    # Get image dimension
+    ds = rw.open_image(image_filename)
+    nb_row, nb_col, _ = rw.get_image_dimension(ds)
+    #initialization of the array
+    img = np.zeros((nb_row, nb_col, 1), dtype='uint8')
+    img[t_img[0], t_img[1], 0] = Y_predict
+    rw.write_image(out_classif, img, data_set=ds, gdal_dtype=gdal.GDT_Byte,
+                transform=None, projection=None, driver_name=None,
+                nb_col=None, nb_ligne=None, nb_band=1)
     return None
