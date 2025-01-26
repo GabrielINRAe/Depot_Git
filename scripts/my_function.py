@@ -16,8 +16,9 @@ import read_and_write as rw
 import classification as cla
 from rasterstats import zonal_stats
 from sklearn.metrics import (confusion_matrix, classification_report,
-    accuracy_score)
+    accuracy_score, precision_recall_fscore_support)
 from sklearn.model_selection import StratifiedGroupKFold
+from rasterstats import zonal_stats
 
 def filter_classes(dataframe, valid_classes):
     """
@@ -347,7 +348,6 @@ def rasterization (
     os.system(cmd)
     return None
 
-
 def calculate_class_percentages(polygons, raster_path):
     """
     Calcule les pourcentages des classes dans chaque polygone.
@@ -358,17 +358,18 @@ def calculate_class_percentages(polygons, raster_path):
         stats=["sum", "count"],
         categorical=True
     )
+    # Ajouter les statistiques aux polygones
     return pd.DataFrame(stats)
 
-
-def apply_decision_rules(class_percentages , samples_path):
+def apply_decision_rules(class_percentages, samples_path):
     """
-    Création de l'arbre de décision sur la base des pourcentages de classes dans chaque polygone
+    Création de l'arbre de décision sur la base des pourcentages de classes dans chaque polygone.
     """
     code_predit = []
     samples = gpd.read_file(samples_path)
+    
     for index, row in class_percentages.iterrows():
-        # Vérifier la surface
+        # Vérifier la surface (en m², donc 2 ha = 20 000 m²)
         surface = row.get("Surface", 0)
         # Calculer la proportion totale de feuillus
         sum_feuillus = (
@@ -384,46 +385,99 @@ def apply_decision_rules(class_percentages , samples_path):
             row.get("Melange_de_coniferes", 0)
         )
         if surface < 20000:
-            code_predit.append("Surface < 2 ha")
-            continue
-            # Appliquer l'arbre de décision
-            if sum_feuillus > 75:
-                code_predit.append("Feuillus_en_ilots")
-            elif sum_coniferes > 75:
-                code_predit.append("Coniferes_en_ilots")
-            elif sum_coniferes > sum_feuillus:
-                code_predit.append("Melange_de_coniferes_preponderants_et_feuillus")
-            else:
-                code_predit.append("Melange_de_feuillus_preponderants_et_coniferes")
-                
+                # Appliquer l'arbre de décision pour les mélanges
+                if sum_feuillus > 75:
+                    code_predit.append("Melange_feuillus")
+                elif sum_coniferes > 75:
+                    code_predit.append("Melange_coniferes")
+                elif sum_coniferes > sum_feuillus:
+                    code_predit.append("Melange_de_coniferes_preponderants_et_feuillus")
+                else:
+                    code_predit.append("Melange_de_feuillus_preponderants_et_coniferes")
+       
         else: 
             if row['class_percentage'] > 75:
                 code_predit.append(samples["Nom"][index])
-            elif row['class_percentage'] < 75:
+            else:
                 if sum_feuillus > 75:
                     code_predit.append("Melange_feuillus")
                 elif sum_coniferes > 75:
                     code_predit.append("Melange_coniferes")
                 elif sum_coniferes < 75 and sum_coniferes > sum_feuillus:
-                    code_predit.append("Melange_de_conifères_prépondérants_et_feuillus")
+                    code_predit.append("Melange_de_conifères_preponderants_et_feuillus")
                 else:
-                code_predit.append("Melange_de_feuillus_prépondérants_et_coniferes")
+                    code_predit.append("Melange_de_feuillus_preponderants_et_coniferes")
     return code_predit
 
-def compute_confusion_matrix(polygons, label_col, prediction_col):
+def compute_confusion_matrix_with_plots(polygons, label_col, prediction_col):
     """
-    Calcule la matrice de confusion et affiche les métriques.
+    Calcule la matrice de confusion, affiche les métriques et génère les graphiques demandés.
+    :param polygons: GeoDataFrame ou DataFrame contenant les labels et prédictions.
+    :param label_col: Nom de la colonne pour les labels vrais.
+    :param prediction_col: Nom de la colonne pour les prédictions.
+    :param output_dir: Répertoire où sauvegarder les graphiques.
     """
-    y_true = polygons[label_col]
-    y_pred = polygons[prediction_col]
+    # Vérification des colonnes
+    if label_col not in polygons.columns or prediction_col not in polygons.columns:
+        raise ValueError(f"Les colonnes {label_col} et/ou {prediction_col} sont introuvables dans les données.")
 
-    cm = confusion_matrix(y_true, y_pred, labels=np.unique(y_true))
-    report = classification_report(y_true, y_pred)
+    # Suppression des lignes avec des valeurs manquantes dans les colonnes d'intérêt
+    polygons = polygons.dropna(subset=[label_col, prediction_col])
 
+    # Récupération des labels vrais et prédits
+    y_true = polygons[label_col].astype(str)  # Conversion en chaîne pour éviter les comparaisons avec None
+    y_pred = polygons[prediction_col].astype(str)
+
+    # Calcul de la matrice de confusion
+    labels = np.unique(y_true)
+    cm = confusion_matrix(y_true, y_pred, labels=labels)
+    
+    # Classification report
+    precision, recall, f1_score, _ = precision_recall_fscore_support(y_true, y_pred, labels=labels, zero_division=0)
+    
+    # Normalisation pour les pourcentages
+    cm_normalized = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+
+    # ---- Création de la heatmap de la matrice de confusion ----
+    plt.figure(figsize=(12, 10))
+    sns.heatmap(cm_normalized, annot=True, fmt=".2f", cmap="Greens", xticklabels=labels, yticklabels=labels)
+    plt.xlabel("Predicted labels")
+    plt.ylabel("True labels")
+    plt.title("Confusion Matrix with Normalized Values")
+    plt.tight_layout()
+    plt.show()
+
+    # ---- Création du graphique des métriques (précision, rappel, F1) ----
+    metrics = np.array([precision, recall, f1_score])
+    metric_names = ["Precision", "Recall", "F1 Score"]
+
+    plt.figure(figsize=(10, 8))
+    bar_width = 0.25
+    x = np.arange(len(labels))
+
+    for i, metric in enumerate(metrics):
+        plt.bar(x + i * bar_width, metric * 100, width=bar_width, label=metric_names[i])
+
+    # Personnalisation des axes
+    plt.xlabel("Classes")
+    plt.ylabel("Score (%)")
+    plt.title("Class quality estimation")
+    plt.xticks(x + bar_width, labels, rotation=45, ha="right")
+    plt.legend()
+    plt.grid(axis="y", linestyle="--", alpha=0.7)
+    plt.tight_layout()
+    plt.show()
+
+    # Retour des métriques au besoin
     return {
         "confusion_matrix": cm,
-        "classification_report": report
+        "classification_report": classification_report(y_true, y_pred, labels=labels, zero_division=0),
+        "precision": precision,
+        "recall": recall,
+        "f1_score": f1_score
     }
+
+
 
 
 def pre_traitement_img(
