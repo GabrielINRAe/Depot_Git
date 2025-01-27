@@ -18,7 +18,7 @@ from rasterstats import zonal_stats
 from sklearn.metrics import (confusion_matrix, classification_report,
     accuracy_score, precision_recall_fscore_support)
 from sklearn.model_selection import StratifiedGroupKFold
-from rasterstats import zonal_stats
+from collections import defaultdict
 
 def filter_classes(dataframe, valid_classes):
     """
@@ -348,44 +348,56 @@ def rasterization (
     os.system(cmd)
     return None
 
-def calculate_class_percentages(polygons, raster_path):
-    """
-    Calcule les pourcentages des classes dans chaque polygone.
-    """
-    stats = zonal_stats(
-        polygons,
-        raster_path,
-        stats=["sum", "count"],
-        categorical=True
-    )
-    # Ajouter les statistiques aux polygones
-    return pd.DataFrame(stats)
-
 def apply_decision_rules(class_percentages, samples_path):
     """
     Création de l'arbre de décision sur la base des pourcentages de classes dans chaque polygone.
+
+    Arguments :
+    - class_percentages : DataFrame contenant les pourcentages de classe pour chaque polygone.
+    - samples : DataFrame contenant des informations supplémentaires sur les échantillons 
+
+    Retourne :
+    - Une liste `code_predit` avec les codes prévus pour chaque polygone.
     """
     code_predit = []
     samples = gpd.read_file(samples_path)
-    
+    # Calcul la surface de chaque polygone
+    samples["Surface"] = samples.geometry.area
+
     for index, row in class_percentages.iterrows():
-        # Vérifier la surface (en m², donc 2 ha = 20 000 m²)
-        surface = row.get("Surface", 0)
-        # Calculer la proportion totale de feuillus
+        # Calcul de la proportion totale de feuillus
         sum_feuillus = (
             row.get("Autre_feuillus", 0) +
             row.get("Feuillus_en_ilot", 0) +
             row.get("Melange_de_feuillus", 0)
         )
-        
-        # Calculer la proportion totale de conifères
+
+        # Calculer de la proportion totale de conifères
         sum_coniferes = (
             row.get("Autre_coniferes", 0) +
             row.get("Coniferes_en_ilot", 0) +
             row.get("Melange_de_coniferes", 0)
         )
-        if surface < 20000:
-                # Appliquer l'arbre de décision pour les mélanges
+
+        # recherche  de la classe avec le pourcentage dominant
+        dominant_class_percentage = row.get("class_percentage", 0)
+
+        # Règle de décision pour une surface < 2 ha (20 000 m²)
+        if samples["Surface"] < 20000:
+            if sum_feuillus > 75:
+                code_predit.append("Melange_feuillus")
+            elif sum_coniferes > 75:
+                code_predit.append("Melange_coniferes")
+            elif sum_coniferes > sum_feuillus:
+                code_predit.append("Melange_de_coniferes_preponderants_et_feuillus")
+            else:
+                code_predit.append("Melange_de_feuillus_preponderants_et_coniferes")
+        # Règle de décision pour une surface >= 2 ha (20 000 m²)
+        else:
+            if dominant_class_percentage > 75:
+                # Utiliser la valeur de l'échantillon si elle est disponible
+                code_predit.append(samples["Nom"].get(index, "Classe_inconnue"))
+            else:
                 if sum_feuillus > 75:
                     code_predit.append("Melange_feuillus")
                 elif sum_coniferes > 75:
@@ -394,20 +406,9 @@ def apply_decision_rules(class_percentages, samples_path):
                     code_predit.append("Melange_de_coniferes_preponderants_et_feuillus")
                 else:
                     code_predit.append("Melange_de_feuillus_preponderants_et_coniferes")
-       
-        else: 
-            if row['class_percentage'] > 75:
-                code_predit.append(samples["Nom"][index])
-            else:
-                if sum_feuillus > 75:
-                    code_predit.append("Melange_feuillus")
-                elif sum_coniferes > 75:
-                    code_predit.append("Melange_coniferes")
-                elif sum_coniferes < 75 and sum_coniferes > sum_feuillus:
-                    code_predit.append("Melange_de_conifères_preponderants_et_feuillus")
-                else:
-                    code_predit.append("Melange_de_feuillus_preponderants_et_coniferes")
+
     return code_predit
+
 
 def compute_confusion_matrix_with_plots(polygons, label_col, prediction_col):
     """
@@ -476,7 +477,6 @@ def compute_confusion_matrix_with_plots(polygons, label_col, prediction_col):
         "recall": recall,
         "f1_score": f1_score
     }
-
 
 
 
