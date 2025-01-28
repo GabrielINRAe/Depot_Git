@@ -85,7 +85,7 @@ print("Les cinq premiers labels dans Y:", Y[:5])
 codes_of_interest = [12, 13, 14, 23, 24, 25]
 
 # Liste des dates relatives à chaque bande NDVI
-dates = ['2023-01-01', '2023-03-01', '2023-05-01', '2023-07-01', '2023-09-01', '2023-11-01']
+dates = ["25/1","26/3","5/4","14/7","22/9","11/11"]
 
 # Codes de couleur pour chaque classe
 colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b']
