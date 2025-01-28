@@ -12,7 +12,7 @@ from my_function import apply_decision_rules, compute_confusion_matrix_with_plot
 # Définition des cheminss d'accès 
 my_folder = '/home/onyxia/work/Depot_Git/results/data'
 sample_filename = os.path.join(my_folder, 'sample/Sample_BD_foret_T31TCJ.shp')
-image_filename = os.path.join (my_folder,'classif/carte_essences_echelle_pixel.tif')
+image_filename = os.path.join(my_folder, 'classif/carte_essences_echelle_pixel.tif')
 
 # Utilisation de zonal_stats pour obtenir le total des pixels par polygone
 zonal_statistics = zonal_stats(
@@ -64,13 +64,14 @@ for polygon_result in polygon_classes_percentages:
 df_polygon_classes_percentages = pd.DataFrame(polygon_classes_percentages)
 
 # Ajout des classifications prédites selon les règles de décision
+polygons = gpd.read_file(sample_filename)
 polygons["code_predit"] = apply_decision_rules(df_polygon_classes_percentages, sample_filename)
 polygons.head(5)
 
 # Sauvegarde des  données avec la nouvelle colonne
-output_path_samples = os.path.join (my_folder, "classif/carte_essences_echelle_peuplement.shp")
+output_path_samples = os.path.join(my_folder, "classif/carte_essences_echelle_peuplement.shp")
 polygons.to_file(output_path_samples)
 
 # calcul de  la matrice de confusion
-confusion_matrix = compute_confusion_matrix_with_plots(polygons,"Nom","code_predit")
+confusion_matrix = compute_confusion_matrix_with_plots(polygons, "Nom", "code_predit")
 print(confusion_matrix)

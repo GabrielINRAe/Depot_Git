@@ -349,41 +349,44 @@ def rasterization (
     return None
 
 def apply_decision_rules(class_percentages, samples_path):
+    
     """
-    Création de l'arbre de décision sur la base des pourcentages de classes dans chaque polygone.
+    Applique des règles de décision pour déterminer la classe prédominante de chaque polygone.
 
     Arguments :
-    - class_percentages : DataFrame contenant les pourcentages de classe pour chaque polygone.
-    - samples : DataFrame contenant des informations supplémentaires sur les échantillons 
+    - class_percentages : DataFrame contenant une colonne `class_percentages` avec des dictionnaires.
+    - samples_path : Chemin vers le fichier des échantillons.
 
     Retourne :
-    - Une liste `code_predit` avec les codes prévus pour chaque polygone.
+    - Une liste `code_predit` avec les codes prédits pour chaque polygone.
     """
-    code_predit = []
-    samples = gpd.read_file(samples_path)
-    # Calcul la surface de chaque polygone
-    samples["Surface"] = samples.geometry.area
+    code_predit = []  # Liste pour stocker les classes prédites
+    samples = gpd.read_file(samples_path)  # Charger les données des échantillons
+    samples["Surface"] = samples.geometry.area  # Calculer la surface des polygones
 
     for index, row in class_percentages.iterrows():
-        # Calcul de la proportion totale de feuillus
-        sum_feuillus = (
-            row.get("Autre_feuillus", 0) +
-            row.get("Feuillus_en_ilot", 0) +
-            row.get("Melange_de_feuillus", 0)
-        )
+        # Récupérer le dictionnaire des pourcentages pour ce polygone
+        class_dict = row["class_percentages"]
 
-        # Calculer de la proportion totale de conifères
-        sum_coniferes = (
-            row.get("Autre_coniferes", 0) +
-            row.get("Coniferes_en_ilot", 0) +
-            row.get("Melange_de_coniferes", 0)
-        )
+        # Surface du polygone
+        surface = samples.loc[index, "Surface"] if index in samples.index else 0
 
-        # recherche  de la classe avec le pourcentage dominant
-        dominant_class_percentage = row.get("class_percentage", 0)
+        # Identifier la classe dominante et son pourcentage
+        if class_dict:  # Vérifier que le dictionnaire n'est pas vide
+            dominant_class_name = max(class_dict, key=class_dict.get)  # Classe avec le plus grand pourcentage
+            dominant_class_percentage = class_dict[dominant_class_name]  # Pourcentage de cette classe
+        else:  # Si le dictionnaire est vide
+            dominant_class_name = None
+            dominant_class_percentage = 0
 
-        # Règle de décision pour une surface < 2 ha (20 000 m²)
-        if samples["Surface"] < 20000:
+    for index, row in class_percentages.iterrows():
+
+        # Calcul des proportions
+        sum_feuillus = row.get("Autre_feuillus", 0) + row.get("Feuillus_en_ilot", 0) + row.get("Melange_de_feuillus", 0)
+        sum_coniferes = row.get("Autre_coniferes", 0) + row.get("Coniferes_en_ilot", 0) + row.get("Melange_de_coniferes", 0)
+
+        # Décisions
+        if surface < 20000:  # Cas surface < 2 ha
             if sum_feuillus > 75:
                 code_predit.append("Melange_feuillus")
             elif sum_coniferes > 75:
@@ -392,21 +395,17 @@ def apply_decision_rules(class_percentages, samples_path):
                 code_predit.append("Melange_de_coniferes_preponderants_et_feuillus")
             else:
                 code_predit.append("Melange_de_feuillus_preponderants_et_coniferes")
-        # Règle de décision pour une surface >= 2 ha (20 000 m²)
-        else:
+        else:  # Cas surface >= 2 ha
             if dominant_class_percentage > 75:
-                # Utiliser la valeur de l'échantillon si elle est disponible
-                code_predit.append(samples["Nom"].get(index, "Classe_inconnue"))
+                code_predit.append(dominant_class_name)
+            elif sum_feuillus > 75:
+                code_predit.append("Melange_feuillus")
+            elif sum_coniferes > 75:
+                code_predit.append("Melange_coniferes")
+            elif sum_coniferes > sum_feuillus:
+                code_predit.append("Melange_de_coniferes_preponderants_et_feuillus")
             else:
-                if sum_feuillus > 75:
-                    code_predit.append("Melange_feuillus")
-                elif sum_coniferes > 75:
-                    code_predit.append("Melange_coniferes")
-                elif sum_coniferes > sum_feuillus:
-                    code_predit.append("Melange_de_coniferes_preponderants_et_feuillus")
-                else:
-                    code_predit.append("Melange_de_feuillus_preponderants_et_coniferes")
-
+                code_predit.append("Melange_de_feuillus_preponderants_et_coniferes")
     return code_predit
 
 
