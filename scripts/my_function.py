@@ -382,8 +382,8 @@ def apply_decision_rules(class_percentages, samples_path):
     for index, row in class_percentages.iterrows():
 
         # Calcul des proportions
-        sum_feuillus = row.get("Autre_feuillus", 0) + row.get("Feuillus_en_ilot", 0) + row.get("Melange_de_feuillus", 0)+row.get("Chene", 0)+row.get("Peupleraie", 0)+row.get("Robinier", 0)
-        sum_coniferes = row.get("Autres_coniferes_autre_que_pin", 0) + row.get("Coniferes_en_ilot", 0) + row.get("Melange_coniferes", 0)+ row.get("Douglas", 0)+ row.get("Pin_maritime", 0)+ row.get("Pin_laricio_ou_pin_noir", 0)+ row.get("Autres_Pin", 0)
+        sum_feuillus = row.get("11", 0) + row.get("16", 0) + row.get("15", 0)+row.get("12", 0)+row.get("14", 0)+row.get("13", 0)
+        sum_coniferes = row.get("21", 0) + row.get("27", 0) + row.get("26", 0)+ row.get("23", 0)+ row.get("25", 0)+ row.get("24", 0)+ row.get("22", 0)
 
         # Décisions
         if surface < 20000:  # Cas surface < 2 ha
