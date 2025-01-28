@@ -16,8 +16,9 @@ import read_and_write as rw
 import classification as cla
 from rasterstats import zonal_stats
 from sklearn.metrics import (confusion_matrix, classification_report,
-    accuracy_score)
+    accuracy_score, precision_recall_fscore_support)
 from sklearn.model_selection import StratifiedGroupKFold
+from collections import defaultdict
 
 def filter_classes(dataframe, valid_classes):
     """
@@ -347,57 +348,137 @@ def rasterization (
     os.system(cmd)
     return None
 
+def apply_decision_rules(class_percentages, samples_path):
+    
+    """
+    Applique des règles de décision pour déterminer la classe prédominante de chaque polygone.
 
-def calculate_class_percentages(polygons, raster_path):
-    """
-    Calcule les pourcentages des classes dans chaque polygone.
-    """
-    stats = zonal_stats(
-        polygons,
-        raster_path,
-        stats=["sum", "count"],
-        categorical=True
-    )
-    return pd.DataFrame(stats)
+    Arguments :
+    - class_percentages : DataFrame contenant une colonne `class_percentages` avec des dictionnaires.
+    - samples_path : Chemin vers le fichier des échantillons.
 
-
-def apply_decision_rules(class_percentages):
+    Retourne :
+    - Une liste `code_predit` avec les codes prédits pour chaque polygone.
     """
-    Applique les règles de décision pour classifier les polygones.
-    """
-    predicted_classes = []
+    code_predit = []  # Liste pour stocker les classes prédites
+    samples = gpd.read_file(samples_path)  # Charger les données des échantillons
+    samples["Surface"] = samples.geometry.area  # Calculer la surface des polygones
 
     for index, row in class_percentages.iterrows():
-        # Récupérer les proportions de feuillus et conifères
-        sum_feuillus = row.get("Feuillus", 0)
-        sum_coniferes = row.get("Conifères", 0)
+        # Récupérer le dictionnaire des pourcentages pour ce polygone
+        class_dict = row["class_percentages"]
 
-        # Appliquer l'arbre de décision
-        if sum_feuillus > 75:
-            predicted_classes.append("Feuillus en ilots")
-        elif sum_coniferes > 75:
-            predicted_classes.append("Conifères en ilots")
-        elif sum_coniferes > sum_feuillus:
-            predicted_classes.append("Mélange conifères prépondérants")
-        else:
-            predicted_classes.append("Mélange feuillus prépondérants")
+        # Surface du polygone
+        surface = samples.loc[index, "Surface"] if index in samples.index else 0
 
-    return predicted_classes
+        # Identifier la classe dominante et son pourcentage
+        if class_dict:  # Vérifier que le dictionnaire n'est pas vide
+            dominant_class_name = max(class_dict, key=class_dict.get)  # Classe avec le plus grand pourcentage
+            dominant_class_percentage = class_dict[dominant_class_name]  # Pourcentage de cette classe
+        else:  # Si le dictionnaire est vide
+            dominant_class_name = None
+            dominant_class_percentage = 0
 
-def compute_confusion_matrix(polygons, label_col, prediction_col):
+    for index, row in class_percentages.iterrows():
+
+        # Calcul des proportions
+        sum_feuillus = row.get("11", 0) + row.get("16", 0) + row.get("15", 0)+row.get("12", 0)+row.get("14", 0)+row.get("13", 0)
+        sum_coniferes = row.get("21", 0) + row.get("27", 0) + row.get("26", 0)+ row.get("23", 0)+ row.get("25", 0)+ row.get("24", 0)+ row.get("22", 0)
+
+        # Décisions
+        if surface < 20000:  # Cas surface < 2 ha
+            if sum_feuillus > 75 and sum_coniferes < sum_feuillus: 
+                code_predit.append("Feuillus_en_ilots")
+            elif sum_coniferes > 75 and sum_coniferes > sum_feuillus: 
+                code_predit.append("coniferes_en_ilots")
+            elif sum_coniferes > sum_feuillus: 
+                code_predit.append("Melange_de_coniferes_preponderants_et_feuillus")
+            else:
+                code_predit.append("Melange_de_feuillus_preponderants_et_coniferes")
+        else:  # Cas surface >= 2 ha
+            if dominant_class_percentage > 75:
+                code_predit.append(dominant_class_name)
+            elif sum_feuillus > 75 and sum_coniferes < 75: 
+                code_predit.append("Melange_feuillus")
+            elif sum_coniferes > 75 and sum_feuillus < 75: 
+                code_predit.append("Melange_coniferes")
+            elif sum_coniferes > sum_feuillus:
+                code_predit.append("Melange_de_coniferes_preponderants_et_feuillus")
+            else:
+                code_predit.append("Melange_de_feuillus_preponderants_et_coniferes")
+    return code_predit
+
+
+def compute_confusion_matrix_with_plots(polygons, label_col, prediction_col):
     """
-    Calcule la matrice de confusion et affiche les métriques.
+    Calcule la matrice de confusion, affiche les métriques et génère les graphiques demandés.
+    :param polygons: GeoDataFrame ou DataFrame contenant les labels et prédictions.
+    :param label_col: Nom de la colonne pour les labels vrais.
+    :param prediction_col: Nom de la colonne pour les prédictions.
+    :param output_dir: Répertoire où sauvegarder les graphiques.
     """
-    y_true = polygons[label_col]
-    y_pred = polygons[prediction_col]
+    # Vérification des colonnes
+    if label_col not in polygons.columns or prediction_col not in polygons.columns:
+        raise ValueError(f"Les colonnes {label_col} et/ou {prediction_col} sont introuvables dans les données.")
 
-    cm = confusion_matrix(y_true, y_pred, labels=np.unique(y_true))
-    report = classification_report(y_true, y_pred)
+    # Suppression des lignes avec des valeurs manquantes dans les colonnes d'intérêt
+    polygons = polygons.dropna(subset=[label_col, prediction_col])
 
+    # Récupération des labels vrais et prédits
+    y_true = polygons[label_col].astype(str)  # Conversion en chaîne pour éviter les comparaisons avec None
+    y_pred = polygons[prediction_col].astype(str)
+    print(polygons[[label_col, prediction_col]].head(10))
+    # Calcul de la matrice de confusion
+    labels = np.unique(y_true)
+    cm = confusion_matrix(y_true, y_pred, labels=labels)
+    
+    # Classification report
+    precision, recall, f1_score, _ = precision_recall_fscore_support(y_true, y_pred, labels=labels, zero_division=0)
+    
+    # Normalisation pour les pourcentages
+    cm_sum = cm.sum(axis=1)
+    cm_sum[cm_sum == 0] = 1  # Évite la division par zéro
+    cm_normalized = cm.astype('float') / cm_sum[:, np.newaxis]
+
+    # ---- Création de la heatmap de la matrice de confusion ----
+    plt.figure(figsize=(12, 10))
+    sns.heatmap(cm_normalized, annot=True, fmt=".2f", cmap="Greens", xticklabels=labels, yticklabels=labels)
+    plt.xlabel("Predicted labels")
+    plt.ylabel("True labels")
+    plt.title("Confusion Matrix with Normalized Values")
+    plt.tight_layout()
+    plt.show()
+
+    # ---- Création du graphique des métriques (précision, rappel, F1) ----
+    metrics = np.array([precision, recall, f1_score])
+    metric_names = ["Precision", "Recall", "F1 Score"]
+
+    plt.figure(figsize=(10, 8))
+    bar_width = 0.25
+    x = np.arange(len(labels))
+
+    for i, metric in enumerate(metrics):
+        plt.bar(x + i * bar_width, metric * 100, width=bar_width, label=metric_names[i])
+
+    # Personnalisation des axes
+    plt.xlabel("Classes")
+    plt.ylabel("Score (%)")
+    plt.title("Class quality estimation")
+    plt.xticks(x + bar_width, labels, rotation=45, ha="right")
+    plt.legend()
+    plt.grid(axis="y", linestyle="--", alpha=0.7)
+    plt.tight_layout()
+    plt.show()
+
+    # Retour des métriques au besoin
     return {
         "confusion_matrix": cm,
-        "classification_report": report
+        "classification_report": classification_report(y_true, y_pred, labels=labels, zero_division=0),
+        "precision": precision,
+        "recall": recall,
+        "f1_score": f1_score
     }
+
 
 
 def pre_traitement_img(
