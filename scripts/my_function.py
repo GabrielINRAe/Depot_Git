@@ -382,25 +382,25 @@ def apply_decision_rules(class_percentages, samples_path):
     for index, row in class_percentages.iterrows():
 
         # Calcul des proportions
-        sum_feuillus = row.get("Autre_feuillus", 0) + row.get("Feuillus_en_ilot", 0) + row.get("Melange_de_feuillus", 0)
-        sum_coniferes = row.get("Autre_coniferes", 0) + row.get("Coniferes_en_ilot", 0) + row.get("Melange_de_coniferes", 0)
+        sum_feuillus = row.get("Autre_feuillus", 0) + row.get("Feuillus_en_ilot", 0) + row.get("Melange_de_feuillus", 0)+row.get("Chene", 0)+row.get("Peupleraie", 0)+row.get("Robinier", 0)
+        sum_coniferes = row.get("Autres_coniferes_autre_que_pin", 0) + row.get("Coniferes_en_ilot", 0) + row.get("Melange_coniferes", 0)+row.get("Douglas", 0)+row.get("Pin_maritime", 0)+row.get("Pin_laricio_ou_pin_noir", 0)+row.get("Autres_Pin", 0)
 
         # Décisions
         if surface < 20000:  # Cas surface < 2 ha
-            if sum_feuillus > 75:
-                code_predit.append("Melange_feuillus")
-            elif sum_coniferes > 75:
-                code_predit.append("Melange_coniferes")
-            elif sum_coniferes > sum_feuillus:
+            if sum_feuillus > 75 and sum_coniferes < sum_feuillus: 
+                code_predit.append("Feuillus_en_ilots")
+            elif sum_coniferes > 75 and sum_coniferes > sum_feuillus: 
+                code_predit.append("coniferes_en_ilots")
+            elif sum_coniferes > sum_feuillus: 
                 code_predit.append("Melange_de_coniferes_preponderants_et_feuillus")
             else:
                 code_predit.append("Melange_de_feuillus_preponderants_et_coniferes")
         else:  # Cas surface >= 2 ha
             if dominant_class_percentage > 75:
                 code_predit.append(dominant_class_name)
-            elif sum_feuillus > 75:
+            elif sum_feuillus > 75 and sum_coniferes < 75: 
                 code_predit.append("Melange_feuillus")
-            elif sum_coniferes > 75:
+            elif sum_coniferes > 75 and sum_feuillus < 75: 
                 code_predit.append("Melange_coniferes")
             elif sum_coniferes > sum_feuillus:
                 code_predit.append("Melange_de_coniferes_preponderants_et_feuillus")
@@ -427,7 +427,7 @@ def compute_confusion_matrix_with_plots(polygons, label_col, prediction_col):
     # Récupération des labels vrais et prédits
     y_true = polygons[label_col].astype(str)  # Conversion en chaîne pour éviter les comparaisons avec None
     y_pred = polygons[prediction_col].astype(str)
-
+    print(polygons[[label_col, prediction_col]].head(10))
     # Calcul de la matrice de confusion
     labels = np.unique(y_true)
     cm = confusion_matrix(y_true, y_pred, labels=labels)
@@ -436,7 +436,9 @@ def compute_confusion_matrix_with_plots(polygons, label_col, prediction_col):
     precision, recall, f1_score, _ = precision_recall_fscore_support(y_true, y_pred, labels=labels, zero_division=0)
     
     # Normalisation pour les pourcentages
-    cm_normalized = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+    cm_sum = cm.sum(axis=1)
+    cm_sum[cm_sum == 0] = 1  # Évite la division par zéro
+    cm_normalized = cm.astype('float') / cm_sum[:, np.newaxis]
 
     # ---- Création de la heatmap de la matrice de confusion ----
     plt.figure(figsize=(12, 10))
