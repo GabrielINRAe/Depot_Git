@@ -4,12 +4,13 @@
 import os
 import seaborn as sns
 import geopandas as gpd
-from osgeo import gdal, ogr
+from osgeo import gdal, ogr, gdal_array
 import numpy as np
 import pandas as pd
 import matplotlib
 from sklearn.ensemble import RandomForestClassifier
 import matplotlib.pyplot as plt
+from shapely.geometry import Point
 import sys
 sys.path.append('/home/onyxia/work/libsigma')
 import read_and_write as rw
@@ -646,3 +647,135 @@ def save_classif(
                 transform=None, projection=None, driver_name=None,
                 nb_col=None, nb_ligne=None, nb_band=1)
     return None
+
+
+def get_samples_from_roi(raster_name, sample_name, id_image_name, value_to_extract=None,
+                         bands=None, output_fmt='full_matrix'):
+    '''
+    The function gets the set of pixel of an image according to an roi file (raster).
+    In case of raster format, both map should be of same size.
+
+    Parameters
+    ----------
+    raster_name : string
+        The name of the raster file, could be any file GDAL can open.
+    sample_name : string
+        The path of the sample image.
+    id_image_name : string
+        The path of the raster file containing polygon IDs.
+    value_to_extract : float, optional, defaults to None
+        If specified, the pixels extracted will be only those which are equal to this value.
+        By default, all the pixels different from zero are extracted.
+    bands : list of integer, optional, defaults to None
+        The bands of the raster_name file whose value should be extracted.
+        Indexation starts at 0. By default, all the bands will be extracted.
+    output_fmt : {'full_matrix', 'by_label'}, optional
+        By default, the function returns a matrix with all pixels present in the sample dataset.
+        With option 'by_label', a dictionary containing as many array as labels present in the sample dataset,
+        i.e., the pixels are grouped in matrices corresponding to one label, the keys of the dictionary corresponding to the labels.
+        The coordinates 't' will also be in dictionary format.
+
+    Returns
+    -------
+    X : ndarray or dict of ndarray
+        The sample matrix. A nXd matrix, where n is the number of referenced pixels and d is the number of variables.
+        Each line of the matrix is a pixel.
+    Y : ndarray
+        The label of the pixel.
+    t : tuple or dict of tuple
+        Tuple of the coordinates in the original image of the pixels extracted. Allows rebuilding the image from `X` or `Y`.
+    P : ndarray
+        The ID of the polygon to which each pixel belongs.
+    '''
+
+    # Open raster and sample images
+    raster = gdal.Open(raster_name)
+    sample = gdal.Open(sample_name)
+    id_image = gdal.Open(id_image_name)
+
+    # Check if the files were opened correctly
+    if raster is None or sample is None or id_image is None:
+        raise FileNotFoundError("One or more of the specified raster files could not be opened. Check the file paths.")
+
+    # Check if the dimensions match
+    if raster.RasterXSize != sample.RasterXSize or raster.RasterYSize != sample.RasterYSize:
+        raise ValueError("Images should be of the same size")
+
+    if not bands:
+        nb_band = raster.RasterCount
+        bands = list(range(nb_band))
+    else:
+        nb_band = len(bands)
+
+    # Read sample and id image arrays
+    sample_array = sample.GetRasterBand(1).ReadAsArray()
+    id_array = id_image.GetRasterBand(1).ReadAsArray()
+
+    if value_to_extract:
+        t = np.where(sample_array == value_to_extract)
+    else:
+        t = np.nonzero(sample_array)
+
+    Y = sample_array[t].reshape((t[0].shape[0], 1)).astype('int32')
+    P = id_array[t].reshape((t[0].shape[0], 1)).astype('int32')
+
+    del sample_array
+    del id_array
+    sample = None  # Close the sample file
+    id_image = None  # Close the id image file
+
+    try:
+        X = np.empty((t[0].shape[0], nb_band), dtype=gdal_array.GDALTypeCodeToNumericTypeCode(raster.GetRasterBand(1).DataType))
+    except MemoryError:
+        print('Impossible to allocate memory: sample too large')
+        return
+
+    # Load the data
+    for i in bands:
+        temp = raster.GetRasterBand(i + 1).ReadAsArray()
+        X[:, i] = temp[t]
+        del temp
+    raster = None  # Close the raster file
+
+    if output_fmt == 'by_label':
+        labels = np.unique(Y)
+        dict_X = {}
+        dict_t = {}
+        dict_P = {}
+        for lab in labels:
+            coord = np.where(Y == lab)[0]
+            dict_X[lab] = X[coord]
+            dict_t[lab] = (t[0][coord], t[1][coord])
+            dict_P[lab] = P[coord]
+        return dict_X, Y, dict_t, dict_P
+    else:
+        return X, Y, t, P
+
+def main(in_vector, image_filename, sample_filename, id_image_filename):
+
+    X, Y, t, P = get_samples_from_roi(image_filename, sample_filename, id_image_filename)
+    points = [Point(x, y) for x, y in zip(t[1], t[0])]
+    
+    gdf_points = gpd.GeoDataFrame(geometry=points)
+    gdf_points['class'] = Y
+    gdf_points['polygon_id'] = P
+
+    for i in range(X.shape[1]):
+        gdf_points[f'band_{i+1}'] = X[:, i]
+
+    gdf_polygons = gpd.read_file(in_vector)
+    gdf_points.set_crs(gdf_polygons.crs, inplace=True)
+    gdf_joined = gpd.sjoin(gdf_points, gdf_polygons, how="left", predicate="intersects")
+
+    List_classes = [11, 12, 13, 14, 15, 23, 24, 25, 26, 28, 29]
+    gdf_filtered = gdf_joined[gdf_joined['class'].isin(List_classes)]
+
+    return gdf_filtered  # Retorna el resultado
+
+
+def calcular_distancia(group, band_columns):
+    diferencias = group[band_columns].values - group[[f'{band}_centroid' for band in band_columns]].values
+    distancia = np.sqrt((diferencias ** 2).sum(axis=1))
+    group['distancia_euclidiana'] = distancia
+    return group
+
