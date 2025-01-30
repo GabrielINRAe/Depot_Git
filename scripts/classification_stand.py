@@ -12,7 +12,7 @@ sys.path.append('/home/onyxia/work/Depot_Git/scripts')
 from my_function import calculate_surface, calcul_distance, get_dominant_class, make_decision, apply_decision_rules, compute_confusion_matrix_with_plots
 
 # Définition des cheminss d'accès 
-my_folder = '/home/onyxia/work/Depot_Git/results/data'
+my_folder = '/home/onyxia/work/results/data'
 sample_filename = os.path.join(my_folder, 'sample/Sample_BD_foret_T31TCJ.shp')
 image_filename = os.path.join(my_folder, 'classif/carte_essences_echelle_pixel.tif')
 
@@ -62,7 +62,7 @@ df_polygon_classes_percentages = pd.DataFrame(polygon_classes_percentages)
 df_polygon_classes_percentages.head(5)
 
 # # Asegúrate de ajustar la ruta del archivo shapefile
-sample_filename = "/home/onyxia/work/Depot_Git/results/data/sample/Sample_BD_foret_T31TCJ.shp"  # Reemplázalo con la ruta real
+sample_filename = "/home/onyxia/work/results/data/sample/Sample_BD_foret_T31TCJ.shp" 
 predictions = apply_decision_rules(df_polygon_classes_percentages, sample_filename)
 
 # # Mostrar las predicciones

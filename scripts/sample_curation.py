@@ -10,7 +10,7 @@ from my_function import filter_classes
 
 # definition des paramètres 
 my_folder = '/home/onyxia/work/data/project'
-out_folder = '/home/onyxia/work/Depot_Git/results/data'
+out_folder = '/home/onyxia/work/results/data'
 in_vector = os.path.join(my_folder, 'FORMATION_VEGETALE.shp')
 emprise_path = os.path.join(my_folder, 'emprise_etude.shp')
 out_file = os.path.join(out_folder,'sample/Sample_BD_foret_T31TCJ.shp')

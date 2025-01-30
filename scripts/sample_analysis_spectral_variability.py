@@ -17,7 +17,7 @@ sys.path.append('/home/onyxia/work/Depot_Git/scripts')
 from my_function import main, get_samples_from_roi, calcular_distancia
 
 # Définition des paramètres 
-my_folder = '/home/onyxia/work/Depot_Git/results/data'
+my_folder = '/home/onyxia/work/results/data'
 in_vector = os.path.join(my_folder, 'sample/Sample_BD_foret_T31TCJ.shp')
 raster_name = os.path.join(my_folder, 'img_pretraitees/Serie_temp_S2_allbands.tif')
 out_image = os.path.splitext(in_vector)[0] + '_v2.tif'

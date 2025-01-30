@@ -28,19 +28,19 @@ racine = "/home/onyxia/work"
 output_dir = os.path.join(racine,"output_classif")
 os.makedirs(output_dir, exist_ok=True) # Création d'un dossier output temporaire
 
-path_sample = os.path.join(racine,"Depot_Git/results/data/sample/Sample_BD_foret_T31TCJ.shp")
+path_sample = os.path.join(racine,"results/data/sample/Sample_BD_foret_T31TCJ.shp")
 path_sample_px = os.path.join(output_dir,"sample_classif_px.shp")
 
 sample_rasterized = os.path.join(output_dir,"rasterized_sample.tif")
-path_image_3b = os.path.join(racine,"Depot_Git/results/data/img_pretraitees/Serie_temp_S2_3_bands.tif")
-path_image_10b = os.path.join(racine,"Depot_Git/results/data/img_pretraitees/Serie_temp_S2_10_bands.tif")
-path_image_allbands = os.path.join(racine,"Depot_Git/results/data/img_pretraitees/Serie_temp_S2_allbands.tif")
+path_image_3b = os.path.join(racine,"results/data/img_pretraitees/Serie_temp_S2_3_bands.tif")
+path_image_10b = os.path.join(racine,"results/data/img_pretraitees/Serie_temp_S2_10_bands.tif")
+path_image_allbands = os.path.join(racine,"results/data/img_pretraitees/Serie_temp_S2_allbands.tif")
 
 path_sample_px_centroid = os.path.join(output_dir,"sample_px_centroid.shp")
 path_sample_px_id = os.path.join(output_dir,"sample_px_id.shp")
 path_rasterized_sample_id = os.path.join(output_dir, "rasterized_sample_id.tif")
 
-out_classif = os.path.join(racine, "Depot_Git/results/data/classif/carte_essences_echelle_pixel.tif")
+out_classif = os.path.join(racine, "results/data/classif/carte_essences_echelle_pixel.tif")
 
 # Save d'un vecteur echantillons avec que les données pour classif pixel
 sample = gpd.read_file(path_sample)
