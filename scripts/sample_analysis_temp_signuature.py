@@ -2,7 +2,6 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-
 # Personal libraries
 import sys 
 sys.path.append('/home/onyxia/work/libsigma')

@@ -15,8 +15,9 @@ from my_function import (
 
 # Définition des paramètres 
 racine = '/home/onyxia/work'
-my_folder = os.path.join(racine,'results/data/sample')
+my_folder = os.path.join(racine,'results/sample')
 out_folder = os.path.join(racine,'results/figure')
+os.makedirs(out_folder, exist_ok=True)      
 in_vector = os.path.join(my_folder, 'Sample_BD_foret_T31TCJ.shp')
 diag_baton_poly_classe_path = os.path.join(out_folder,'diag_baton_nb_poly_by_class.png')
 diag_baton_pixel_classe_path = os.path.join(out_folder,'diag_baton_nb_pix_by_class.png')

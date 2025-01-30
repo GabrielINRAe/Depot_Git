@@ -14,7 +14,7 @@ from shapely.geometry import Point
 sys.path.append('/home/onyxia/work/libsigma')
 import classification as cla
 sys.path.append('/home/onyxia/work/Depot_Git/scripts')
-from my_function import main, get_samples_from_roi, calcular_distancia
+from my_function import main, get_samples_from_roi, calcul_distance
 
 # Définition des paramètres 
 my_folder = '/home/onyxia/work/results/data'

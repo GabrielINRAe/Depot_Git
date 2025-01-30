@@ -11,10 +11,11 @@ from my_function import filter_classes
 # definition des paramètres 
 racine = '/home/onyxia/work'
 my_folder = os.path.join(racine,'data/project')
-out_folder = os.path.join(racine,"results/data/sample")
+output_folder = os.path.join(racine,"results/sample")
+os.makedirs(output_folder, exist_ok=True) 
 in_vector = os.path.join(my_folder, 'FORMATION_VEGETALE.shp')
 emprise_path = os.path.join(my_folder, 'emprise_etude.shp')
-out_file = os.path.join(out_folder,'Sample_BD_foret_T31TCJ.shp')
+out_file = os.path.join(output_folder,'Sample_BD_foret_T31TCJ.shp')
 # Chargement des données
 # Chargement de BD Forêt
 bd_foret = gpd.read_file(in_vector)
@@ -89,3 +90,4 @@ df['Code'] = df['Code'].values.astype('uint8')
 df_f = df[['Nom','Code','geometry']]
 
 df.to_file(out_file)
+print ("c bon ")
