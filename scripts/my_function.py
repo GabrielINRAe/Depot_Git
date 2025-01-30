@@ -31,7 +31,7 @@ def sel_classif_pixel(dataframe):
     """
     Sélectionne seulement les classes pour la classification à l'échelle des pixels
     """
-    codes = [11,12,13,14,21,22,23,24,25]
+    codes = [11, 12, 13, 14, 21, 22, 23, 24, 25]
     return dataframe[dataframe['Code'].isin(codes)]
 
 def count_polygons_by_class(dataframe, class_column='classif_objet'):
@@ -41,11 +41,8 @@ def count_polygons_by_class(dataframe, class_column='classif_objet'):
     return dataframe.groupby(class_column).size().reset_index(name='count')
 
 
-def compute_ndvi(
-    masque,
-    ref_raster_path,
-    l_traitements
-    ):
+def compute_ndvi(masque, ref_raster_path, l_traitements ):
+
     """
     Calcule le NDVI.
 
@@ -75,9 +72,9 @@ def compute_ndvi(
             if date in img and nir_name in img :
                 nir = rw.load_img_as_array(img)[:,:,0].astype('float32')
         nominator = nir-red
-        nominator_masked = np.where(nominator>=0,nominator,0)
+        nominator_masked = np.where(nominator >= 0, nominator, 0)
         denominator = nir+red
-        ndvi_blank[:,:,i] = np.where(denominator!=0,nominator_masked/denominator,0)
+        ndvi_blank[:,:,i] = np.where(denominator != 0, nominator_masked/denominator, 0)
     ndvi_masked = np.where(masque == 1, ndvi_blank, int(-9999))
     return ndvi_masked
 
@@ -105,11 +102,11 @@ def violin_plot(
     Parameters:
         df (pd.DataFrame): DataFrame contenant les données à tracer.
         output_file (str): Chemin et nom du fichier pour enregistrer le graphique.
-        title (str, optional): Titre du graphique. Par défaut "".
-        xlabel (str, optional): Étiquette de l'axe X. Par défaut "".
-        ylabel (str, optional): Étiquette de l'axe Y. Par défaut "".
-        palette (str, optional): Palette de couleurs pour le graphique. Par défaut "muted".
-        figsize (tuple, optional): Taille de la figure. Par défaut (12, 8).
+        title (str, optional): Titre du graphique.
+        xlabel (str, optional): Étiquette de l'axe X.
+        ylabel (str, optional): Étiquette de l'axe Y.
+        palette (str, optional): Palette de couleurs pour le graphique.
+        figsize (tuple, optional): Taille de la figure.
 
     Returns:
         None
@@ -225,6 +222,7 @@ def create_violin_plot(polygon_distances, violin_plot_dist_centroide_by_poly_by_
     - polygon_distances (dict): Dictionnaire où les clés sont les noms des classes et les valeurs
       sont des listes de distances moyennes des polygones de chaque classe.
     - violin_plot_dist_centroide_by_poly_by_class_path (str): Chemin complet pour sauvegarder le graphique.
+
     """
 
     # Créer les données pour le graphique
@@ -252,24 +250,9 @@ def create_violin_plot(polygon_distances, violin_plot_dist_centroide_by_poly_by_
     plt.close()
 
 
-def get_polygon_labels(Y):
-    """
-    Fonction pour extraire les étiquettes des polygones associés aux pixels.
-
-    Arguments :
-    Y -- ndarray (numpy array) contenant les étiquettes des classes (ou autre identifiant, comme les polygones).
-
-    Retourne :
-    labels -- ndarray avec les étiquettes des polygones pour chaque pixel.
-    """
-    if Y.ndim > 1:
-        Y = Y.flatten()  # Aplatir si nécessaire
-    return Y  # Retourne directement Y s'il contient les étiquettes des polygones
-
-
 def masque_shp(path_input, path_output):
     """
-    Permet la création du masque en format shp à partir d'un fichier formation végétale shp.
+    Permet la création du masque en format shp à partir du fichier formation végétale shp.
 
     Parameters:
         path_input (str): Chemin du fichier pour accéder au fichier formation végétale
@@ -372,6 +355,7 @@ def apply_decision_rules(class_percentages, samples_path):
 
     Retourne :
     - Une liste `code_predit` avec les codes prédits pour chaque polygone.
+
     """
     code_predit = []  # Liste pour stocker les classes prédites
     samples = gpd.read_file(samples_path)  # Charger les données des échantillons
@@ -493,12 +477,12 @@ def compute_confusion_matrix_with_plots(polygons, label_col, prediction_col):
     }
 
 
-
 def pre_traitement_img(
     p_emprise,
     l_images,
     input_raster_dir,
     output_dir):
+
     """
     Rasterise un fichier vectoriel.
 
@@ -534,7 +518,7 @@ def pre_traitement_img(
             # format = "MEM",  # Utiliser MEM comme format
             cutlineDSName = geojson_str,  # Passer directement le GeoJSON
             cropToCutline = True,
-            outputType = gdal.GDT_UInt16, #UInt16
+            outputType = gdal.GDT_UInt16, # UInt16
             dstSRS = "EPSG:2154",  # Reprojection
             xRes = resolution,  # Résolution X
             yRes = resolution,  # Résolution Y
@@ -700,16 +684,16 @@ def get_samples_from_roi(raster_name, sample_name, id_image_name, value_to_extra
         The ID of the polygon to which each pixel belongs.
     '''
 
-    # Open raster and sample images
+    # lecture des rasters 
     raster = gdal.Open(raster_name)
     sample = gdal.Open(sample_name)
     id_image = gdal.Open(id_image_name)
 
-    # Check if the files were opened correctly
+    # Vérification si les rasters sont bien chargées 
     if raster is None or sample is None or id_image is None:
         raise FileNotFoundError("One or more of the specified raster files could not be opened.")
 
-    # Check if the dimensions match
+    # Vérification si le raster de référence et le raster des échantillons ont la même dimension
     if raster.RasterXSize != sample.RasterXSize or raster.RasterYSize != sample.RasterYSize:
         raise ValueError("Images should be of the same size")
 
@@ -719,7 +703,7 @@ def get_samples_from_roi(raster_name, sample_name, id_image_name, value_to_extra
     else:
         nb_band = len(bands)
 
-    # Read sample and id image arrays
+    # Lecture de matrice des échantillons et des identifiants 
     sample_array = sample.GetRasterBand(1).ReadAsArray()
     id_array = id_image.GetRasterBand(1).ReadAsArray()
 
@@ -733,8 +717,8 @@ def get_samples_from_roi(raster_name, sample_name, id_image_name, value_to_extra
 
     del sample_array
     del id_array
-    sample = None  # Close the sample file
-    id_image = None  # Close the id image file
+    sample = None  #  fermuture de fichier des échantillons 
+    id_image = None  # Fermuture de fichier des idendifiants 
 
     try:
         X = np.empty((t[0].shape[0], nb_band), dtype=gdal_array.GDALTypeCodeToNumericTypeCode(raster.GetRasterBand(1).DataType))
@@ -742,12 +726,12 @@ def get_samples_from_roi(raster_name, sample_name, id_image_name, value_to_extra
         print('Impossible to allocate memory: sample too large')
         return
 
-    # Load the data
+    # chargement des données 
     for i in bands:
         temp = raster.GetRasterBand(i + 1).ReadAsArray()
         X[:, i] = temp[t]
         del temp
-    raster = None  # Close the raster file
+    raster = None  # fermeture de raster 
 
     if output_fmt == 'by_label':
         labels = np.unique(Y)
@@ -782,13 +766,12 @@ def main(in_vector, image_filename, sample_filename, id_image_filename):
     List_classes = [11, 12, 13, 14, 15, 23, 24, 25, 26, 28, 29]
     gdf_filtered = gdf_joined[gdf_joined['class'].isin(List_classes)]
 
-    return gdf_filtered  # Retorna el resultado
-
+    return gdf_filtered  
 
 def calcul_distance(group, band_columns):
     difference = group[band_columns].values - group[[f'{band}_centroid' for band in band_columns]].values
     distance = np.sqrt((difference ** 2).sum(axis=1))
-    group['distancia_euclidiana'] = distance
+    group['distance_euclidienne'] = distance
     return group
 
 
@@ -813,6 +796,7 @@ def get_dominant_class(class_dict):
 
     class_dict : Dictionnaire contenant les classes et leurs pourcentages.
     Retourne : Le code de la classe dominante ainsi que son pourcentage.
+
     """
     if class_dict:
         dominant_class_code = max(class_dict, key=class_dict.get)
@@ -831,9 +815,8 @@ def calculate_proportions(class_percentages):
     Retourne : La somme des pourcentages des feuillus et des conifères.
 
     """
-    feuillus_classes = [11, 12, 13, 14, 15, 16]  # Ejemplo de clases que podrían ser de feuillus
-    coniferes_classes = [21, 22, 23, 24, 25, 26, 27]  # Ejemplo de clases que podrían ser de conifères
-    
+    feuillus_classes = [11, 12, 13, 14, 15, 16]  # liste des codes associés aux classes feuillus 
+    coniferes_classes = [21, 22, 23, 24, 25, 26, 27]  # liste de codes associées aux classe conifère 
     sum_feuillus = 0
     sum_coniferes = 0
     
@@ -848,7 +831,7 @@ def calculate_proportions(class_percentages):
 
 def make_decision(surface, sum_feuillus, sum_coniferes, dominant_class_percentage, dominant_class_code):
     """
-            Applique les règles de décision basées sur la surface et les proportions de classes 
+        Applique les règles de décision basées sur la surface et les proportions de classes 
 
     Arguments :
 

@@ -87,7 +87,6 @@ df = filtered_samples.join(
     filtered_samples["TFV"].map(lambda x: category_mapping.get(x, {})).apply(pd.Series)
 )
 df['Code'] = df['Code'].values.astype('uint8')
-df_f = df[['Nom','Code','geometry']]
+df_f = df[['Nom', 'Code', 'geometry']]
 
 df.to_file(out_file)
-print ("c bon ")
