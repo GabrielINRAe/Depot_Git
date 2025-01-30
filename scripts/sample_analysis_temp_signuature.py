@@ -10,12 +10,13 @@ import classification as cla
 import read_and_write as rw
 
 # Définition des paramètres
-my_folder = '/home/onyxia/work/results/data'
+racine = '/home/onyxia/work'
+my_folder = os.path.join(racine,'results/data')
 in_vector = os.path.join(my_folder, 'sample/Sample_BD_foret_T31TCJ.shp')
 ref_image = os.path.join(my_folder, 'img_pretraitees/Serie_temp_S2_ndvi.tif')
 out_image = os.path.splitext(in_vector)[0] + '_v2.tif'
 field_name = 'Code'  # field containing the numeric label of the classes
-output_path = os.path.join(my_folder, "../figure/temp_mean_ndvi.png")
+output_path = os.path.join(racine, "results/figure/temp_mean_ndvi.png")
 
 # Caractéristiques de raster de référence
 sptial_resolution = 10
@@ -41,31 +42,11 @@ os.system(cmd)
 sample_filename = os.path.join(my_folder, 'sample/Sample_BD_foret_T31TCJ_v2.tif')
 image_filename = os.path.join(my_folder, 'img_pretraitees/Serie_temp_S2_ndvi.tif')
 X, Y, t = cla.get_samples_from_roi(image_filename, sample_filename)
-print(X.shape)
-print(Y.shape)
-
-# Vérification des valeurs de X
-min_X = X.min()
-max_X = X.max()
-print(f"Valeur minimale de X: {min_X}")
-print(f"Valeur maximale de X: {max_X}")
-
-# Vérification des valeurs de raster NDVI
-out_of_range = X[(X < -1) | (X > 1)]
-if len(out_of_range) > 0:
-    print(f"Valeurs de NDVI non incluses dans l'intervalle [-1,1]: {out_of_range}")
-else:
-    print("Pas de valeurs de NDVI en dehors de l'intervalle [-1,1]")
 
 # Conversion de t à une liste de tuples (x, y)
 coords = list(zip(t[0], t[1]))
-print(coords[:5])
 
 Y = Y.flatten()
-
-# Vérification de la taille des matrices X et Y
-print(X.shape)
-print(Y.shape)
 
 # Liste de codes correspondant aux classes d'intérêt
 list_of_interest = ['12', '13', '14', '23', '24', '25']
@@ -76,11 +57,6 @@ mask = np.isin(Y.astype(str), list_of_interest)
 
 X_filtered = X[mask]
 Y_filtered = Y[mask]
-
-# Vérification des tailles après filtrage
-print("Shape de X_filtered:", X_filtered.shape)
-print("Shape de Y_filtered:", Y_filtered.shape)
-print("Les cinq premiers labels dans Y:", Y[:5])
 
 codes_of_interest = [12, 13, 14, 23, 24, 25]
 
@@ -116,27 +92,5 @@ plt.xticks(rotation=45)
 plt.tight_layout()
 
 # Enregistrement du graphique
-plt.savefig(out_image, dpi=300)
+plt.savefig(output_path, dpi=300)
 print(f"Graphique enregistré dans : {output_path}")
-
-plt.show()
-
-# Vérification de la quantité d'échantillons par classe et par date
-for idx, code in enumerate(codes_of_interest):
-    X_class = X_filtered[Y_filtered == code]
-    print(f"Classe : {class_names[idx]} (Code : {code})")
-    print(f"Nombre d'échantillons pour cette classe : {X_class.shape[0]}")
-    if X_class.shape[0] > 0:
-        print(f" les cinq premiers échantillons : {X_class[:5]}")
-    else:
-        print("Il n'y a pas d'échantillons pour cette classe.")
-        
-# Vérification de la variance pour chaque classe 
-for idx, code in enumerate(codes_of_interest):
-    X_class = X_filtered[Y_filtered == code]
-    if X_class.shape[0] > 0:
-        stds = X_class.std(axis=0)
-        print(f"Classe : {class_names[idx]} (Code : {code})")
-        print(f"Écart-type par date : {stds}")
-        if np.all(stds == 0):
-            print("L'écart-type est 0 pour toutes les dates.")
