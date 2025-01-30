@@ -11,7 +11,7 @@ os.makedirs(output_dir, exist_ok=True)       # Crée le dossier output temporair
 path_f_vege = os.path.join(racine,"data/project/FORMATION_VEGETALE.shp")    # Path pour le fichier shp formation végétale
 path_masque_traite = os.path.join(output_dir,'mask_traite.shp')    # Path pour le fichier shp masque traité 
 path_emprise = os.path.join(racine,"data/project/emprise_etude.shp")    # Path pour le fichier shp emprise
-path_masque_raster = os.path.join(racine, '/results/data/img_pretraitees/masque_foret.tif')
+path_masque_raster = os.path.join(racine,'results/data/img_pretraitees/masque_foret.tif')
 
 # Formatage du fichier masque en format shp à partir
 masque_shp(path_input=path_f_vege,
