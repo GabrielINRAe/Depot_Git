@@ -25,7 +25,7 @@ shapefile_path = os.path.join(racine,"data/project/emprise_etude.shp")
 output_dir = os.path.join(racine,"output_pretraitement")
 os.makedirs(output_dir, exist_ok=True)
 
-masque_path = os.path.join(racine,"Depot_Git/results/data/img_pretraitees/masque_foret.tif")
+masque_path = os.path.join(racine,"/results/data/img_pretraitees/masque_foret.tif")
 
 # Réalisation des pré-traitements sur les images individuelles 
 pre_traitement_img(
@@ -60,7 +60,7 @@ array_final_masqued = np.concatenate(L_array_masqued, axis=2)
 print("Tableau concaténé avec masque appliqué")
 
 # Save array into image
-out_masqued = "/home/onyxia/work/Depot_Git/results/data/img_pretraitees/Serie_temp_S2_allbands.tif"
+out_masqued = "/home/onyxia/work/results/data/img_pretraitees/Serie_temp_S2_allbands.tif"
 print("Ecriture en cours")
 rw.write_image(out_filename=out_masqued, array=array_final_masqued, data_set=rw.open_image(ref_raster_path))
 print("Ecriture terminée")
@@ -74,7 +74,7 @@ traitements_dir = output_dir
 L_traitements = [os.path.join(traitements_dir,i) for i in sorted(os.listdir(traitements_dir))]
 # L_traitements = os.path.join(traitements_dir,sorted(os.listdir(traitements_dir)))
 ref_raster_path = os.path.join(traitements_dir,"traitement_20220125_B2.tif")
-masque_path = "/home/onyxia/work/Depot_Git/results/data/img_pretraitees/masque_foret.tif"
+masque_path = "/home/onyxia/work/results/data/img_pretraitees/masque_foret.tif"
 masque = rw.load_img_as_array(masque_path)
 
 # Pour les 6 dates 
@@ -104,7 +104,7 @@ for i,date in enumerate(dates) :
 ndvi_masked = np.where(masque == 1, ndvi_blank, -9999)
 
 # Save array into image
-out_ndvi = "/home/onyxia/work/Depot_Git/results/data/img_pretraitees/Serie_temp_S2_ndvi.tif"
+out_ndvi = "/home/onyxia/work/results/data/img_pretraitees/Serie_temp_S2_ndvi.tif"
 print("Ecriture en cours")
 rw.write_image(out_filename=out_ndvi, array=ndvi_masked, data_set=rw.open_image(ref_raster_path), gdal_dtype=gdal.GDT_Float32)
 print("Ecriture terminée")

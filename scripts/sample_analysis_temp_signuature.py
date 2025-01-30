@@ -10,7 +10,7 @@ import classification as cla
 import read_and_write as rw
 
 # Définition des paramètres
-my_folder = '/home/onyxia/work/Depot_Git/results/data'
+my_folder = '/home/onyxia/work/results/data'
 in_vector = os.path.join(my_folder, 'sample/Sample_BD_foret_T31TCJ.shp')
 ref_image = os.path.join(my_folder, 'img_pretraitees/Serie_temp_S2_ndvi.tif')
 out_image = os.path.splitext(in_vector)[0] + '_v2.tif'
