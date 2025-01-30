@@ -773,9 +773,101 @@ def main(in_vector, image_filename, sample_filename, id_image_filename):
     return gdf_filtered  # Retorna el resultado
 
 
-def calcular_distancia(group, band_columns):
+def calcul_distance(group, band_columns):
     diferencias = group[band_columns].values - group[[f'{band}_centroid' for band in band_columns]].values
-    distancia = np.sqrt((diferencias ** 2).sum(axis=1))
-    group['distancia_euclidiana'] = distancia
+    distance = np.sqrt((diferencias ** 2).sum(axis=1))
+    group['distancia_euclidiana'] = distance
     return group
+
+
+def calculate_surface(samples_path, index):
+    """
+    Calcul la surface de chaque polygone présent dans la couche vecteur d'entrée 
+    Paramatères :  sample_path :  chemin vers la couche vecteur d'entrée 
+                    index = l'indice associé à chaque polygone 
+    """
+    samples = gpd.read_file(samples_path)
+    if index in samples.index:
+        return samples.loc[index, "geometry"].area
+    else:
+        return 0
+
+
+def get_dominant_class(class_dict):
+    """
+    Identifier la classe dominante et son pourcentage à partir du dictionnaire des pourcentages de recouvrement de chaque classe 
+
+    Arguments :
+
+    class_dict : Dictionnaire contenant les classes et leurs pourcentages.
+    Retourne : Le code de la classe dominante ainsi que son pourcentage.
+    """
+    if class_dict:
+        dominant_class_code = max(class_dict, key=class_dict.get)
+        dominant_class_percentage = class_dict[dominant_class_code]
+        return dominant_class_code, dominant_class_percentage
+    else:
+        return None, 0
+
+def calculate_proportions(class_percentages):
+    """
+    Calcul la somme des proportions de feuillus et de conifères à partir des données d'une ligne.
+
+    Arguments :
+
+    class_percentages : Dictionnaire contenant les pourcentages des différentes classes.
+    Retourne : La somme des pourcentages des feuillus et des conifères.
+
+    """
+    feuillus_classes = [11, 12, 13, 14, 15, 16]  # Ejemplo de clases que podrían ser de feuillus
+    coniferes_classes = [21, 22, 23, 24, 25, 26, 27]  # Ejemplo de clases que podrían ser de conifères
+    
+    sum_feuillus = 0
+    sum_coniferes = 0
+    
+    for class_value, percentage in class_percentages.items():
+        if class_value in feuillus_classes:
+            sum_feuillus += percentage
+        elif class_value in coniferes_classes:
+            sum_coniferes += percentage
+    
+    return sum_feuillus, sum_coniferes
+
+
+def make_decision(surface, sum_feuillus, sum_coniferes, dominant_class_percentage, dominant_class_code):
+    """
+            Applique les règles de décision basées sur la surface et les proportions de classes 
+
+    Arguments :
+
+    surface : Surface du polygone.
+    sum_feuillus : Somme des proportions de feuillus.
+    sum_coniferes : Somme des proportions de conifères.
+    dominant_class_percentage : Pourcentage de la classe dominante.
+    dominant_class_code : Code de la classe dominante.
+    Retourne :
+
+    Le code prédit pour chaque polygone.
+
+  """
+    if surface < 20000:  # superficie < 2 ha
+        if sum_feuillus > 75: 
+            return 16
+        elif sum_coniferes > 75: 
+            return 27
+        elif sum_coniferes > sum_feuillus: 
+            return 28
+        else:
+            return 29
+    else:  # superficie >= 2 ha
+        if dominant_class_percentage > 75:
+            return int(dominant_class_code)  
+        elif sum_feuillus > 75: 
+            return 15
+        elif sum_coniferes > 75: 
+            return 26
+        elif sum_coniferes > sum_feuillus:
+            return 28
+        else:
+            return 29
 

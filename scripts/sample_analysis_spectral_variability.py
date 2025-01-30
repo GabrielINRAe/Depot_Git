@@ -6,7 +6,6 @@ import matplotlib
 import geopandas as gpd
 import pandas as pd
 import sys
-import pickle
 import seaborn as sns
 from osgeo import ogr, gdal, gdal_array
 import geopandas as gpd
@@ -40,11 +39,6 @@ gdf = gpd.read_file(in_vector)
 unique_ids = gdf['ID'].unique()
 id_to_int = {id_: idx for idx, id_ in enumerate(unique_ids)}
 int_to_id = {v: k for k, v in id_to_int.items()}
-
-# Guardar el diccionario para su uso posterior
-
-with open('id_to_int.pkl', 'wb') as f:
-    pickle.dump(id_to_int, f)
 
 # Actualizar el shapefile temporalmente con los valores numéricos
 gdf['ID_num'] = gdf['ID'].map(id_to_int)

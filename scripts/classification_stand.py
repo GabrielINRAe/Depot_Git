@@ -6,8 +6,10 @@ from rasterstats import zonal_stats
 import os 
 from osgeo import gdal
 import numpy as np
+import logging
 from collections import defaultdict
-from my_function import apply_decision_rules, compute_confusion_matrix_with_plots
+sys.path.append('/home/onyxia/work/Depot_Git/scripts')
+from my_function import calculate_surface, calcul_distance, get_dominant_class, make_decision, apply_decision_rules, compute_confusion_matrix_with_plots
 
 # Définition des cheminss d'accès 
 my_folder = '/home/onyxia/work/Depot_Git/results/data'
@@ -21,11 +23,6 @@ zonal_statistics = zonal_stats(
     stats=["count"],  # Nombre total de pixels par polygone
     categorical=True  # Activer le mode catégoriel pour extraire les classes
 )
-
-# Chargement de raster pour extraire les classes
-raster = gdal.Open(image_filename)
-band = raster.GetRasterBand(1)  
-raster_data = band.ReadAsArray()
 
 # Boucle pour extraire les classes par polygone
 # liste de dictionnaires pour stocker les pourcentages des classes par polygone
@@ -62,16 +59,26 @@ for polygon_result in polygon_classes_percentages:
         
 # Transformation de resulats sous forme d'un dataframe pour qu'elle soit utilisée par la suite dans la fonction d'arbre de décision 
 df_polygon_classes_percentages = pd.DataFrame(polygon_classes_percentages)
+df_polygon_classes_percentages.head(5)
 
-# Ajout des classifications prédites selon les règles de décision
+# # Asegúrate de ajustar la ruta del archivo shapefile
+sample_filename = "/home/onyxia/work/Depot_Git/results/data/sample/Sample_BD_foret_T31TCJ.shp"  # Reemplázalo con la ruta real
+predictions = apply_decision_rules(df_polygon_classes_percentages, sample_filename)
+
+# # Mostrar las predicciones
+print(predictions.head())
+
+# Suponiendo que ya tienes cargado sample_filename y predictions
+
 polygons = gpd.read_file(sample_filename)
-polygons["code_predit"] = apply_decision_rules(df_polygon_classes_percentages, sample_filename)
-polygons.head(5)
 
-# Sauvegarde des  données avec la nouvelle colonne
-output_path_samples = os.path.join(my_folder, "classif/carte_essences_echelle_peuplement.shp")
+# Añadir las predicciones al GeoDataFrame original
+polygons["code_predit"] = predictions
+
+# Guardar el archivo con las nuevas predicciones
+output_path_samples = os.path.join(my_folder, "classif/carte_essences_echelle_peuplement2.shp")
 polygons.to_file(output_path_samples)
 
-# calcul de  la matrice de confusion
-confusion_matrix = compute_confusion_matrix_with_plots(polygons, "Nom", "code_predit")
+# Calcul de  la matrice de confusion
+confusion_matrix = compute_confusion_matrix_with_plots(polygons, "Code", "code_predit")
 print(confusion_matrix)
