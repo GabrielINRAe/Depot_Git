@@ -17,9 +17,9 @@ sys.path.append('/home/onyxia/work/Depot_Git/scripts')
 from my_function import main, get_samples_from_roi, calcul_distance
 
 # Définition des paramètres 
-my_folder = '/home/onyxia/work/results/data'
-in_vector = os.path.join(my_folder, 'sample/Sample_BD_foret_T31TCJ.shp')
-#raster_name = os.path.join(my_folder, 'img_pretraitees/Serie_temp_S2_allbands.tif')
+my_folder = '/home/onyxia/work/results'
+in_vector = os.path.join(my_folder, 'data/sample/Sample_BD_foret_T31TCJ.shp')
+raster_name = os.path.join(my_folder, 'data/img_pretraitees/Serie_temp_S2_allbands.tif')
 out_image = os.path.splitext(in_vector)[0] + '_v2.tif'
 field_name = 'Code'  # field containing the numeric label of the classes
 violin_plot_path = os.path.join(my_folder, "figure/violin_plot_dist_centroide_by_poly_by_class.png")
@@ -32,7 +32,7 @@ xmax = 609757.9696999999
 ymax = 6314464.023599998
 
 # Leer el shapefile
-in_vector = os.path.join(my_folder, 'sample/Sample_BD_foret_T31TCJ.shp')
+in_vector = os.path.join(my_folder, 'data/sample/Sample_BD_foret_T31TCJ.shp')
 gdf = gpd.read_file(in_vector)
 
 # Crear un diccionario que asigne un valor numérico único a cada ID
@@ -81,13 +81,11 @@ cmd_id = (
 os.system(cmd_class)
 os.system(cmd_id)
 
-image_filename = os.path.join(my_folder, 'img_pretraitees/Serie_temp_S2_allbands.tif')
-sample_filename = os.path.join(my_folder, 'sample/Sample_BD_foret_T31TCJ_class.tif')
-id_image_filename = os.path.join(my_folder, 'sample/Sample_BD_foret_T31TCJ_id.tif')
+image_filename = os.path.join(my_folder, 'data/img_pretraitees/Serie_temp_S2_allbands.tif')
+sample_filename = os.path.join(my_folder, 'data/sample/Sample_BD_foret_T31TCJ_class.tif')
+id_image_filename = os.path.join(my_folder, 'data/sample/Sample_BD_foret_T31TCJ_id.tif')
 
 gdf_filtered = main(in_vector, image_filename, sample_filename, id_image_filename)
-
-print(gdf_filtered.head())
 
 band_columns = [f'band_{i}' for i in range(1, 61)]
 # Asegúrate de que los centroides estén calculados correctamente
@@ -105,13 +103,10 @@ for band in band_columns:
 gdf_merged = gdf_merged.reset_index(drop=True)
 
 # Agrupar por 'class' y 'polygon_id' y aplicar la función
-gdf_merged = gdf_merged.groupby(['class', 'polygon_id'], as_index=False).apply(lambda group: calcular_distancia(group, band_columns))
+gdf_merged = gdf_merged.groupby(['class', 'polygon_id'], as_index=False).apply(lambda group: calcul_distance(group, band_columns))
 
 # Calcular la distancia promedio por class y polygon_id
 distancia_promedio = gdf_merged.groupby(['class', 'polygon_id'])['distancia_euclidiana'].mean()
-
-# Mostrar el resultado
-print(distancia_promedio)
 
 # Convertir el resultado de distancia_promedio a un DataFrame
 distancia_promedio_df = distancia_promedio.reset_index()

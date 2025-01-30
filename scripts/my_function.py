@@ -41,15 +41,45 @@ def count_polygons_by_class(dataframe, class_column='classif_objet'):
     return dataframe.groupby(class_column).size().reset_index(name='count')
 
 
-def compute_ndvi(red_band, nir_band):
+def compute_ndvi(
+    masque,
+    ref_raster_path,
+    l_traitements
+    ):
     """
-    Calcule le NDVI à partir des bandes rouge et proche infrarouge.
-    A REFAIRE PAR (GAB)
+    Calcule le NDVI.
+
+    Parameters:
+        masque (array): Masque sous forme de tableau numpy.
+        ref_raster_path (str): Chemin jusqu'à un raster de référence.
+        l_traitements (list): Liste des prétraitements sur lesquels on va calculer le ndvi.
+
+    Returns:
+        Le tableau du ndvi masqué.
     """
-    nir_band = nir_band.astype('float32')
-    red_band = red_band.astype('float32')
-    ndvi = (nir_band - red_band) / (nir_band + red_band)
-    return ndvi
+    # Pour les 6 dates 
+    x,y = rw.get_image_dimension(rw.open_image(ref_raster_path))[:2]
+    bandes = 6
+
+    dates = ["20220125","20220326","20220405","20220714","20220922","20221111"] # Liste des 6 dates
+    nir_name = 'B8.'
+    r_name = 'B4.'
+
+    ndvi_blank = np.zeros((x,y,bandes), dtype=np.float32)  # Créer un array NDVI avec les mêmes dimensions que nir
+
+    print("Calcul des NDVI")
+    for i,date in enumerate(dates) :
+        for img in l_traitements:
+            if date in img and r_name in img :
+                red = rw.load_img_as_array(img)[:,:,0].astype('float32')
+            if date in img and nir_name in img :
+                nir = rw.load_img_as_array(img)[:,:,0].astype('float32')
+        nominator = nir-red
+        nominator_masked = np.where(nominator>=0,nominator,0)
+        denominator = nir+red
+        ndvi_blank[:,:,i] = np.where(denominator!=0,nominator_masked/denominator,0)
+    ndvi_masked = np.where(masque == 1, ndvi_blank, int(-9999))
+    return ndvi_masked
 
 def plot_bar(data, title, xlabel, ylabel, output_path):
     """
