@@ -1,20 +1,19 @@
-# Importation des bibliothèques nécessaires
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-# Personal libraries
-import sys 
+import sys
+# Ajout du chemin vers les bibliothèques personnalisées
 sys.path.append('/home/onyxia/work/libsigma')
 import classification as cla
 import read_and_write as rw
 
 # Définition des paramètres
 racine = '/home/onyxia/work'
-my_folder = os.path.join(racine,'results/data')
+my_folder = os.path.join(racine, 'results/data')
 in_vector = os.path.join(my_folder, 'sample/Sample_BD_foret_T31TCJ.shp')
 ref_image = os.path.join(my_folder, 'img_pretraitees/Serie_temp_S2_ndvi.tif')
 out_image = os.path.splitext(in_vector)[0] + '_v2.tif'
-field_name = 'Code'  # field containing the numeric label of the classes
+field_name = 'Code'  # Champ contenant le label numérique des classes
 output_path = os.path.join(racine, "results/figure/temp_mean_ndvi.png")
 
 # Caractéristiques de raster de référence
@@ -25,14 +24,17 @@ xmax = 609757.9696999999
 ymax = 6314464.023599998
 
 # Définition de la commande "pattern" avec les paramètres de raster de référence
-cmd_pattern = ("gdal_rasterize -a {field_name} "
-               "-tr {sptial_resolution} {sptial_resolution} "
-               "-te {xmin} {ymin} {xmax} {ymax} -ot Byte -of GTiff "
-               "{in_vector} {out_image}")
+cmd_pattern = (
+    "gdal_rasterize -a {field_name} "
+    "-tr {sptial_resolution} {sptial_resolution} "
+    "-te {xmin} {ymin} {xmax} {ymax} -ot Byte -of GTiff "
+    "{in_vector} {out_image}"
+)
 
-cmd = cmd_pattern.format(in_vector=in_vector, xmin=xmin, ymin=ymin, xmax=xmax,
-                         ymax=ymax, out_image=out_image, field_name=field_name,
-                         sptial_resolution=sptial_resolution)
+cmd = cmd_pattern.format(
+    in_vector=in_vector, xmin=xmin, ymin=ymin, xmax=xmax, ymax=ymax,
+    out_image=out_image, field_name=field_name, sptial_resolution=sptial_resolution
+)
 
 # Exécution de la commande
 os.system(cmd)
@@ -44,7 +46,6 @@ X, Y, t = cla.get_samples_from_roi(image_filename, sample_filename)
 
 # Conversion de t à une liste de tuples (x, y)
 coords = list(zip(t[0], t[1]))
-
 Y = Y.flatten()
 
 # Liste de codes correspondant aux classes d'intérêt
@@ -60,7 +61,7 @@ Y_filtered = Y[mask]
 codes_of_interest = [12, 13, 14, 23, 24, 25]
 
 # Liste des dates relatives à chaque bande NDVI
-dates = ["25/1","26/3","5/4","14/7","22/9","11/11"]
+dates = ["25/1", "26/3", "5/4", "14/7", "22/9", "11/11"]
 
 # Codes de couleur pour chaque classe
 colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b']
