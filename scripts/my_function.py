@@ -191,8 +191,8 @@ def compute_avg_distance_to_centroid(samples, centroid):
 def create_bar_plot(data, output_path):
     """
     Crée un graphique en bâton pour les distances moyennes au centroïde.
-    :param data: dict {class: avg_distance}
-    :param output_path: str, chemin du fichier de sortie
+    data: dict {class: avg_distance}
+    output_path: str, chemin du fichier de sortie
     """
     classes = list(data.keys())
     distances = list(data.values())
