@@ -25,7 +25,7 @@ shapefile_path = os.path.join(racine,"data/project/emprise_etude.shp")
 output_dir = os.path.join(racine,"output_pretraitement")
 os.makedirs(output_dir, exist_ok=True)
 
-masque_path = os.path.join(racine,"/results/data/img_pretraitees/masque_foret.tif")
+masque_path = os.path.join(racine,"results/data/img_pretraitees/masque_foret.tif")
 
 # Réalisation des pré-traitements sur les images individuelles 
 pre_traitement_img(
@@ -60,7 +60,7 @@ array_final_masqued = np.concatenate(L_array_masqued, axis=2)
 print("Tableau concaténé avec masque appliqué")
 
 # Save array into image
-out_masqued = "/home/onyxia/work/results/data/img_pretraitees/Serie_temp_S2_allbands.tif"
+out_masqued = os.path.join(racine,"results/data/img_pretraitees/Serie_temp_S2_allbands.tif")
 print("Ecriture en cours")
 rw.write_image(out_filename=out_masqued, array=array_final_masqued, data_set=rw.open_image(ref_raster_path))
 print("Ecriture terminée")
