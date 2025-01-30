@@ -9,31 +9,24 @@ sys.path.append('/home/onyxia/Depot_Git/scripts')
 from my_function import filter_classes
 
 # definition des paramètres 
-my_folder = '/home/onyxia/work/data/project'
-out_folder = '/home/onyxia/work/Depot_Git/results/data'
+racine = '/home/onyxia/work'
+my_folder = os.path.join(racine,'data/project')
+out_folder = os.path.join(racine,"results/data/sample")
 in_vector = os.path.join(my_folder, 'FORMATION_VEGETALE.shp')
 emprise_path = os.path.join(my_folder, 'emprise_etude.shp')
-out_file = os.path.join(out_folder,'sample/Sample_BD_foret_T31TCJ.shp')
-
+out_file = os.path.join(out_folder,'Sample_BD_foret_T31TCJ.shp')
 # Chargement des données
 # Chargement de BD Forêt
 bd_foret = gpd.read_file(in_vector)
-print(bd_foret.head())
-print(bd_foret.shape)
 
 # Chargement de l'emprise d'étude
 emprise_etude = gpd.read_file(emprise_path)
-print(emprise_etude.head())
-
 # Découpage de la base filtrée en utilisant l'emprise d'étude comme masque
 bd_foret = bd_foret.to_crs(emprise_etude.crs)
 bd_foret_clipped = bd_foret.clip(emprise_etude)
-print(bd_foret_clipped)
 
 # Identification des classes dans la base BD Forêt
 bd_foret_classes = bd_foret["TFV"].unique()
-print(bd_foret_classes)
-
 # Liste des classes valides
 valide_classes = [
     "Forêt fermée d’un autre feuillu pur",
@@ -59,17 +52,11 @@ valide_classes = [
     "Forêt fermée à mélange de conifères prépondérants et feuillus",
     "Forêt fermée à mélange de feuillus prépondérants et conifères",
 ]
-
 # Filtrage des échantillons selon les classes valides
 filtered_samples = filter_classes(bd_foret_clipped, valide_classes)
-print(filtered_samples.head())
 
 # Identification des classes dans les échantillons filtrés
 filtered_samples_classes = filtered_samples["TFV"].unique()
-print(filtered_samples_classes)
-
-# Création du dictionnaire de correspondance des catégories
-# IMPORTANT : Laisser les codes en int c'est nécessaires pour la rasterisation
 category_mapping = {
     'Forêt fermée d’un autre feuillu pur': {'Nom': 'Autres_feuillus', 'Code': 11},
     'Forêt fermée de châtaignier pur': {'Nom': 'Autres_feuillus', 'Code': 11},
@@ -92,18 +79,13 @@ category_mapping = {
     'Forêt fermée à mélange de conifères': {'Nom': 'Melange_coniferes', 'Code': 26},
     'Forêt fermée de conifères purs en îlots': {'Nom': 'Coniferes_en_ilots', 'Code': 27},
     'Forêt fermée à mélange de conifères prépondérants et feuillus': {'Nom': 'Melange_de_coniferes_preponderants_et_feuillus', 'Code': 28},
-    'Forêt fermée à mélange de feuillus prépondérants et conifères': {'Nom': 'Melange_de_feuillus_preponderants_et_coniferes', 'Code': 29},
+    'Forêt fermée à mélange de feuillus prépondérants et conifères': {'Nom': 'Melange_de_feuillus_preponderants_et_coniferes', 'Code': 29}
 }
-
 # Ajout des colonnes via mapping et conversion en DataFrame
 df = filtered_samples.join(
     filtered_samples["TFV"].map(lambda x: category_mapping.get(x, {})).apply(pd.Series)
 )
-
 df['Code'] = df['Code'].values.astype('uint8')
+df_f = df[['Nom','Code','geometry']]
 
-print(df['Code'])
-
-# Enregistrement de la couche de séléction des échantillons
 df.to_file(out_file)
-print("l'enregistrement est réalisé avec succès ")
