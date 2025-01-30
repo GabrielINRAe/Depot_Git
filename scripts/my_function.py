@@ -170,24 +170,6 @@ def report_from_dict_to_df(dict_report):
     return report_df
 
 
-def compute_centroid(samples):
-    """
-    Calcule le centroïde d'un ensemble de points.
-    :param samples: array, shape (n_samples, n_features)
-    :return: array, shape (n_features,)
-    """
-    return np.mean(samples, axis=0)
-
-def compute_avg_distance_to_centroid(samples, centroid):
-    """
-    Calcule la distance moyenne au centroïde.
-    :param samples: array, shape (n_samples, n_features)
-    :param centroid: array, shape (n_features,)
-    :return: float
-    """
-    distances = np.sqrt(np.sum((samples - centroid) ** 2, axis=1))
-    return np.mean(distances)
-
 def create_bar_plot(data, output_path):
     """
     Crée un graphique en bâton pour les distances moyennes au centroïde.
@@ -695,7 +677,7 @@ def get_samples_from_roi(raster_name, sample_name, id_image_name, value_to_extra
 
     # Check if the files were opened correctly
     if raster is None or sample is None or id_image is None:
-        raise FileNotFoundError("One or more of the specified raster files could not be opened. Check the file paths.")
+        raise FileNotFoundError("One or more of the specified raster files could not be opened.")
 
     # Check if the dimensions match
     if raster.RasterXSize != sample.RasterXSize or raster.RasterYSize != sample.RasterYSize:
@@ -774,8 +756,8 @@ def main(in_vector, image_filename, sample_filename, id_image_filename):
 
 
 def calcul_distance(group, band_columns):
-    diferencias = group[band_columns].values - group[[f'{band}_centroid' for band in band_columns]].values
-    distance = np.sqrt((diferencias ** 2).sum(axis=1))
+    difference = group[band_columns].values - group[[f'{band}_centroid' for band in band_columns]].values
+    distance = np.sqrt((difference ** 2).sum(axis=1))
     group['distancia_euclidiana'] = distance
     return group
 

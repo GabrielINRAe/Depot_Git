@@ -19,7 +19,7 @@ from my_function import main, get_samples_from_roi, calcul_distance
 # Définition des paramètres 
 my_folder = '/home/onyxia/work/results/data'
 in_vector = os.path.join(my_folder, 'sample/Sample_BD_foret_T31TCJ.shp')
-raster_name = os.path.join(my_folder, 'img_pretraitees/Serie_temp_S2_allbands.tif')
+#raster_name = os.path.join(my_folder, 'img_pretraitees/Serie_temp_S2_allbands.tif')
 out_image = os.path.splitext(in_vector)[0] + '_v2.tif'
 field_name = 'Code'  # field containing the numeric label of the classes
 violin_plot_path = os.path.join(my_folder, "figure/violin_plot_dist_centroide_by_poly_by_class.png")
