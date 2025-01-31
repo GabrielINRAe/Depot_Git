@@ -4,15 +4,19 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import read_and_write as rw
-import classification as cla
-import plots
+
+
+
 from sklearn.metrics import (
     confusion_matrix, classification_report, accuracy_score
 )
 
 sys.path.append('/home/onyxia/work/libsigma')
+import read_and_write as rw
+import classification as cla
+import plots
 
+sys.path.append('/home/onyxia/work/Depot_Git/scripts')
 from my_function import (
     sel_classif_pixel,
     report_from_dict_to_df,
