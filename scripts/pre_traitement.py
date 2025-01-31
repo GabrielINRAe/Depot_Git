@@ -46,7 +46,7 @@ pre_traitement_img(
 print("Construction de l'array")
 ref_raster_path = os.path.join(output_dir, "traitement_20220125_B2.tif")
 L_images_clip = sorted(os.listdir(output_dir))
-x,y = rw.get_image_dimension(rw.open_image(ref_raster_path))[:2]
+x, y = rw.get_image_dimension(rw.open_image(ref_raster_path))[:2]
 bandes = 3
 array_tot = np.zeros((x,y,bandes))
 
