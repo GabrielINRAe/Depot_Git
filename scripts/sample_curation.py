@@ -11,7 +11,7 @@ from my_function import filter_classes
 # Définition des paramètres
 racine = '/home/onyxia/work'
 my_folder = os.path.join(racine, 'data/project')
-output_folder = os.path.join(racine, "results/sample")
+output_folder = os.path.join(racine, "results/data/sample")
 os.makedirs(output_folder, exist_ok=True)
 in_vector = os.path.join(my_folder, 'FORMATION_VEGETALE.shp')
 emprise_path = os.path.join(my_folder, 'emprise_etude.shp')

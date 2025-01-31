@@ -156,7 +156,7 @@ ax.yaxis.grid(which='minor', color='darkgoldenrod', linestyle='-.',
 plt.savefig(out_qualite, bbox_inches='tight')
 
 save_classif(
-    image_filename=path_image_3bands,
+    image_filename=path_image_allbands,
     model=rfc,
     out_classif=out_classif
 )
