@@ -112,7 +112,7 @@ def violin_plot(
         None
     """
     plt.figure(figsize=figsize)
-    sns.violinplot(data=df, x=x_col, y=y_col, palette=palette)
+    sns.violinplot(data=df, x=x_col, y=y_col, hue=x_col, palette=palette, legend=False)
     plt.xlabel(xlabel if xlabel else x_col, fontsize=12)
     plt.ylabel(ylabel if ylabel else y_col, fontsize=12)
     plt.title(title, fontsize=14)
