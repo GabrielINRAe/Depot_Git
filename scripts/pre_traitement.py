@@ -4,7 +4,8 @@ import os
 import numpy as np
 from my_function import (
     pre_traitement_img,
-    supprimer_dossier_non_vide)
+    supprimer_dossier_non_vide,
+    compute_ndvi)
 import sys
 sys.path.append('/home/onyxia/work/libsigma')
 import read_and_write as rw
@@ -39,7 +40,7 @@ print("Construction de l'array")
 ref_raster_path = os.path.join(output_dir,"traitement_20220125_B2.tif")
 L_images_clip = sorted(os.listdir(output_dir))
 x,y = rw.get_image_dimension(rw.open_image(ref_raster_path))[:2]
-bandes = 60
+bandes = 3
 array_tot = np.zeros((x,y,bandes))
 
 masque = rw.load_img_as_array(masque_path)
@@ -48,7 +49,7 @@ masque = rw.load_img_as_array(masque_path)
 L_array_masqued = []
 
 # Parcourir toutes les images de L_images_clip
-for i, img in enumerate(L_images_clip):
+for i, img in enumerate(L_images_clip[:bandes]):
     path = os.path.join(output_dir, img)
     array = rw.load_img_as_array(path)
     array_masqued = np.where(masque == 1, array, 0)
@@ -60,7 +61,10 @@ array_final_masqued = np.concatenate(L_array_masqued, axis=2)
 print("Tableau concaténé avec masque appliqué")
 
 # Save array into image
-out_masqued = os.path.join(racine,"results/data/img_pretraitees/Serie_temp_S2_allbands.tif")
+if bandes == 60:
+    out_masqued = os.path.join(racine,"results/data/img_pretraitees/Serie_temp_S2_allbands.tif")
+else :
+    out_masqued = os.path.join(racine,f"results/data/img_pretraitees/Serie_temp_S2_{bandes}_band.tif")
 print("Ecriture en cours")
 rw.write_image(out_filename=out_masqued, array=array_final_masqued, data_set=rw.open_image(ref_raster_path))
 print("Ecriture terminée")

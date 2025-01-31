@@ -32,8 +32,7 @@ path_sample = os.path.join(racine,"results/data/sample/Sample_BD_foret_T31TCJ.sh
 path_sample_px = os.path.join(output_dir,"sample_classif_px.shp")
 
 sample_rasterized = os.path.join(output_dir,"rasterized_sample.tif")
-path_image_3b = os.path.join(racine,"results/data/img_pretraitees/Serie_temp_S2_3_bands.tif")
-path_image_10b = os.path.join(racine,"results/data/img_pretraitees/Serie_temp_S2_10_bands.tif")
+path_image_3bands = os.path.join(racine,"results/data/img_pretraitees/Serie_temp_S2_3_band.tif")
 path_image_allbands = os.path.join(racine,"results/data/img_pretraitees/Serie_temp_S2_allbands.tif")
 
 path_sample_px_centroid = os.path.join(output_dir,"sample_px_centroid.shp")
@@ -52,7 +51,7 @@ rasterization(
     in_vector=path_sample_px,
     out_image=sample_rasterized,
     field_name='Code',
-    ref_image=path_image_allbands,
+    ref_image=path_image_3bands,
     dtype='Byte'
 )
 
@@ -62,19 +61,19 @@ rasterization(
     in_vector=path_sample_px_id,
     out_image=path_rasterized_sample_id,
     field_name="id",
-    ref_image=path_image_allbands
+    ref_image=path_image_3bands
 )
 
 # Entrainement du modèle et validation stratifiée groupée
 id_filename = path_rasterized_sample_id
-nb_iter = 30
+nb_iter = 2
 nb_folds = 5
 rfc, list_cm, list_accuracy, list_report, Y_predict =\
 stratified_grouped_validation(
     nb_iter=nb_iter,
     nb_folds=nb_folds,
     sample_filename=sample_rasterized,
-    image_filename=path_image_allbands,
+    image_filename=path_image_3bands,
     id_filename=id_filename
 )
 
@@ -94,7 +93,7 @@ print(len(list_cm_2))
 
 ## Plots
 suffix = '_CV{}folds_stratified_group_x{}times'.format(nb_folds, nb_iter)
-out_figs_dir = os.path.join(racine,"Depot_Git/results/figure")
+out_figs_dir = os.path.join(racine,"results/figure")
 out_matrix = os.path.join(out_figs_dir, 'matrice{}.png'.format(suffix))
 out_qualite = os.path.join(out_figs_dir, 'qualites{}.png'.format(suffix))
 
@@ -154,7 +153,7 @@ ax.yaxis.grid(which='minor', color='darkgoldenrod', linestyle='-.',
 plt.savefig(out_qualite, bbox_inches='tight')
 
 save_classif(
-    image_filename=path_image_allbands,
+    image_filename=path_image_3bands,
     model=rfc,
     out_classif=out_classif
 )
