@@ -32,7 +32,8 @@ shapefile_path = os.path.join(racine, "data/project/emprise_etude.shp")
 output_dir = os.path.join(racine, "output_pretraitement")
 os.makedirs(output_dir, exist_ok=True)
 
-masque_path = os.path.join(racine, "results/data/img_pretraitees/masque_foret.tif")
+masque_path = os.path.\
+    join(racine, "results/data/img_pretraitees/masque_foret.tif")
 
 # Réalisation des pré-traitements sur les images individuelles
 pre_traitement_img(
@@ -47,7 +48,7 @@ print("Construction de l'array")
 ref_raster_path = os.path.join(output_dir, "traitement_20220125_B2.tif")
 L_images_clip = sorted(os.listdir(output_dir))
 x, y = rw.get_image_dimension(rw.open_image(ref_raster_path))[:2]
-bandes = 3
+bandes = 60
 array_tot = np.zeros((x,y,bandes))
 
 masque = rw.load_img_as_array(masque_path)
@@ -69,11 +70,15 @@ print("Tableau concaténé avec masque appliqué")
 
 # Save array into image
 if bandes == 60:
-    out_masqued = os.path.join(racine,"results/data/img_pretraitees/Serie_temp_S2_allbands.tif")
+    out_masqued = os.path.\
+        join(racine,"results/data/img_pretraitees/Serie_temp_S2_allbands.tif")
 else :
-    out_masqued = os.path.join(racine,f"results/data/img_pretraitees/Serie_temp_S2_{bandes}_band.tif")
+    out_masqued = os.path.join(
+        racine,
+        f"results/data/img_pretraitees/Serie_temp_S2_{bandes}_band.tif")
 print("Ecriture en cours")
-rw.write_image(out_filename=out_masqued, array=array_final_masqued, data_set=rw.open_image(ref_raster_path))
+rw.write_image(out_filename=out_masqued, array=array_final_masqued,
+    data_set=rw.open_image(ref_raster_path))
 print("Ecriture terminée")
 
 # Partie Serie_temp_S2_ndvi.tif
@@ -81,14 +86,16 @@ print("Partie NDVI")
 
 # Définition des paramètres
 traitements_dir = output_dir
-l_traitements = [os.path.join(traitements_dir, i) for i in sorted(os.listdir(traitements_dir))]
+l_traitements = [os.path.join(traitements_dir, i) for\
+    i in sorted(os.listdir(traitements_dir))]
 ref_raster_path = os.path.join(traitements_dir, "traitement_20220125_B2.tif")
 masque = rw.load_img_as_array(masque_path)
 
 ndvi_masked = compute_ndvi(masque, ref_raster_path, l_traitements)
 
 # Sauvegarde de l'array en image
-out_ndvi = os.path.join(racine, "results/data/img_pretraitees/Serie_temp_S2_ndvi.tif")
+out_ndvi = os.path.\
+    join(racine, "results/data/img_pretraitees/Serie_temp_S2_ndvi.tif")
 rw.write_image(
     out_filename=out_ndvi,
     array=ndvi_masked,

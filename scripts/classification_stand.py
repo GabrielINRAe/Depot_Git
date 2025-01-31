@@ -4,13 +4,15 @@ from rasterstats import zonal_stats
 import pandas as pd
 import sys
 sys.path.append("/home/onyxia/work/Depot_Git/scripts")
-from my_function import (apply_decision_rules, compute_confusion_matrix_with_plots)
+from my_function import (apply_decision_rules, 
+compute_confusion_matrix_with_plots)
 
 
 # Définition des chemins d'accès
 my_folder = "/home/onyxia/work/results/data"
 sample_filename = os.path.join(my_folder, "sample/Sample_BD_foret_T31TCJ.shp")
-image_filename = os.path.join(my_folder, "classif/carte_essences_echelle_pixel.tif")
+image_filename = os.path.\
+    join(my_folder, "classif/carte_essences_echelle_pixel.tif")
 
 # Utilisation de zonal_stats pour obtenir le total des pixels par polygone
 zonal_statistics = zonal_stats(
@@ -48,7 +50,8 @@ for idx, stats in enumerate(zonal_statistics):
 # Affichage des résultats
 for polygon_result in polygon_classes_percentages:
     print(f"Polygone {polygon_result['polygon_id']} :")
-    for class_value, percentage in polygon_result["class_percentages"].items():
+    for class_value, percentage in polygon_result\
+        ["class_percentages"].items():
         print(f"  Classe {class_value}: {percentage:.2f}%")
 
 # Transformation des résultats sous forme de DataFrame
@@ -57,7 +60,9 @@ df_polygon_classes_percentages = pd.DataFrame(polygon_classes_percentages)
 df_polygon_classes_percentages.head(5)
 
 # Application des règles de décision
-predictions = apply_decision_rules(df_polygon_classes_percentages, sample_filename)
+predictions = apply_decision_rules(
+    df_polygon_classes_percentages,
+    sample_filename)
 
 # Chargement des échantillons à partir de la couche vectorielle
 polygons = gpd.read_file(sample_filename)
@@ -66,9 +71,11 @@ polygons = gpd.read_file(sample_filename)
 polygons["code_predit"] = predictions
 
 # Enregistrement du jeu de données reclassifié
-output_path_samples = os.path.join(my_folder, "classif/carte_essences_echelle_peuplement.shp")
+output_path_samples = os.path.\
+    join(my_folder, "classif/carte_essences_echelle_peuplement.shp")
 polygons.to_file(output_path_samples)
 
 # Calcul de la matrice de confusion
-confusion_matrix = compute_confusion_matrix_with_plots(polygons, "Code", "code_predit")
+confusion_matrix = compute_confusion_matrix_with_plots\
+    (polygons, "Code", "code_predit")
 print(confusion_matrix)

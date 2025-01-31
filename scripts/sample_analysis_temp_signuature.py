@@ -23,7 +23,7 @@ ymin = 6240654.023599998
 xmax = 609757.9696999999
 ymax = 6314464.023599998
 
-# Définition de la commande "pattern" avec les paramètres de raster de référence
+# Définition de la commande "pattern"
 cmd_pattern = (
     "gdal_rasterize -a {field_name} "
     "-tr {sptial_resolution} {sptial_resolution} "
@@ -32,16 +32,20 @@ cmd_pattern = (
 )
 
 cmd = cmd_pattern.format(
-    in_vector=in_vector, xmin=xmin, ymin=ymin, xmax=xmax, ymax=ymax,
-    out_image=out_image, field_name=field_name, sptial_resolution=sptial_resolution
+    in_vector=in_vector, xmin=xmin, ymin=ymin,
+    xmax=xmax, ymax=ymax,
+    out_image=out_image,
+    field_name=field_name, sptial_resolution=sptial_resolution
 )
 
 # Exécution de la commande
 os.system(cmd)
 
 # Définition des chemins d'accès vers les couches d'entrée
-sample_filename = os.path.join(my_folder, 'sample/Sample_BD_foret_T31TCJ_v2.tif')
-image_filename = os.path.join(my_folder, 'img_pretraitees/Serie_temp_S2_ndvi.tif')
+sample_filename = os.path.join\
+    (my_folder, 'sample/Sample_BD_foret_T31TCJ_v2.tif')
+image_filename = os.path.join\
+    (my_folder, 'img_pretraitees/Serie_temp_S2_ndvi.tif')
 X, Y, t = cla.get_samples_from_roi(image_filename, sample_filename)
 
 # Conversion de t à une liste de tuples (x, y)
@@ -52,7 +56,8 @@ Y = Y.flatten()
 list_of_interest = ['12', '13', '14', '23', '24', '25']
 
 # Filtrage des échantillons pour ne garder que les classes d'intérêt
-Y_cleaned = np.array([str(y).strip() for y in Y])  # Supprimer les espaces dans les labels
+# Supprimer les espaces dans les labels
+Y_cleaned = np.array([str(y).strip() for y in Y])  
 mask = np.isin(Y.astype(str), list_of_interest)
 
 X_filtered = X[mask]
@@ -67,7 +72,9 @@ dates = ["25/1", "26/3", "5/4", "14/7", "22/9", "11/11"]
 colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b']
 
 # Labels des classes
-class_names = ['Chêne', 'Robinier', 'Peupleraie', 'Douglas', 'Pin laricio ou pin noir', 'Pin maritime']
+class_names = [
+    'Chêne', 'Robinier', 'Peupleraie', 
+    'Douglas', 'Pin laricio ou pin noir', 'Pin maritime']
 
 # Préparation du graphique
 fig, ax = plt.subplots(figsize=(10, 6))
@@ -79,7 +86,9 @@ for idx, code in enumerate(codes_of_interest):
         means = X_class.mean(axis=0)
         stds = X_class.std(axis=0)
         ax.plot(dates, means, color=colors[idx], label=class_names[idx])
-        ax.fill_between(dates, means + stds, means - stds, color=colors[idx], alpha=0.3)
+        ax.fill_between(
+            dates, means + stds, means - stds, 
+            color=colors[idx], alpha=0.3)
 
 # Configuration des axes et titre
 ax.set_xlabel('Date')
