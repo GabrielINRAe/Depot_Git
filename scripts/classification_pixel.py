@@ -75,8 +75,18 @@ stratified_grouped_validation(
     id_filename=id_filename
 )
 
-# Stratégie d'évitement : suppression des cm n'ayant pas toutes les classes
-list_cm_2 = [cm for cm in list_cm if len(cm) == 9]
+# Stratégie d'évitement : supprimer les tableaux qui n'ont pas toutes les classes
+list_report_2 = []
+list_cm_2 = []
+for report in list_report:
+    nb_report = len(report.keys())
+    if nb_report == 9 :
+        list_report_2.append(report)
+print(len(list_report_2))
+for cm in list_cm:
+    nb_cm = len(cm)
+    if nb_cm == 9:
+        list_cm_2.append(cm)
 print(len(list_cm_2))
 
 # Stratégie de remplissage des report avec des 0
@@ -158,7 +168,6 @@ plt.savefig(out_qualite, bbox_inches='tight')
 save_classif(
     image_filename=path_image_allbands,
     model=rfc,
-    out_classif=out_classif
-)
+    out_classif=out_classif)
 
 supprimer_dossier_non_vide(output_dir)
